@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ironfeast Media, LLC</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50; /  Dark blue-grey */
+            --secondary-color: #3498db; /* Bright blue */
+            --accent-color: #e74c3c; /* Red-orange */
+            --background-color: #f4f6f9; /* Light grey */
+            --text-color: #333;
+            --light-text-color: #ecf0f1;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--light-text-color);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links a, .stream-button {
+            text-decoration: none;
+            color: var(--light-text-color);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--secondary-color);
+        }
+
+        .stream-button {
+            background-color: var(--accent-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .stream-button:hover {
+            background-color: #c0392b; /* Darker red */
+        }
+
+        section {
+            padding: 80px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        #overview { background-color: #fff; text-align: center; }
+        #about { background-color: var(--background-color); }
+        #sbir { background-color: #fff; }
+        #contact { background-color: var(--background-color); }
+
+        h2 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h3 {
+            font-size: 2.25rem;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h4 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        p {
+            font-size: 1.1rem;
+            color: #555;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: #fff;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            background-color: #2980b9;
+        }
+
+        .profile-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .profile-card .images {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .profile-card .images img#self-picture {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--primary-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-card .images img#linkedin-logo {   
+            width: 150px;
+            height: 40px;
+        }
+
+        .profile-text {
+            text-align: center;
+            max-width: 700px;
+        }
+
+        .profile-text h3 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        .profile-text p {
+            text-align: left;
+            margin-bottom: 0;
+        }
+        
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+        
+        .form-group textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        .submit-button {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .submit-button:hover {
+            background-color: #1a2431;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
+            margin-top: 20px;
+        }
+        
+        /* Responsive adjustments */
+        @media (min-width: 768px) {
+            .profile-card {
+                flex-direction: row;
+                text-align: left;
+            }
+            .profile-card.reverse {
+                flex-direction: row-reverse;
+            }
+            .profile-text {
+                text-align: left;
+            }
+        }
+        .section-separator {
+            border: 0;
+            height: 1px;
+            background: #ddd;
+            margin: 40px 0;
+        }
+        ul {
+            list-style-type: none;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container navbar">
+            <a href="#overview" class="logo">Ironfeast Consulting</a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#sbir">SBIR Info</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section id="overview" class="container">
+        <h2>From Concept to Creation: Fueling Your Innovative Journey</h2>
+        <p>At Ironfeast Media, LLC, we understand the challenges of bringing a new idea to life. Whether you're a small business owner with a groundbreaking technology or a researcher with a new discovery, we're here to help you get your project off the ground. We provide two core services to help you turn your vision into a reality:</p>
+        <p><strong>Expert SBIR/STTR Consulting:</strong> We guide entrepreneurs and academics through the complex process of securing non-dilutive government funding. Our team helps you navigate grant applications to win the financial support needed to build and commercialize your innovative product.</p>
+        <p><strong>Digital Content & Streaming:</strong> We help you tell your unique story. Through our streaming and media production services, we create compelling content that connects with audiences, builds your brand, and brings your work to life.</p>
+        <p>Our mission is to empower you to not only launch your next big thing but also to find the audience that will champion it. Let us help you fuel your growth and build a lasting impact.</p>
+        <a href="#contact" class="cta-button">Ready to Launch Your Project? Get in Touch!</a>
+    </section>
+
+    <section id="about" class="container">
+        <h2>About Us</h2>
+        <div class="profile-card">
+            <div class="images">
+                <img src="https://github.com/ironfeast-media/website-consulting/blob/main/public/images/ana-photo.jpeg?raw=true" alt="Picture of Ana Mesquita, PhD" id="self-picture">
+                
+                <a href="https://www.linkedin.com/in/anamsq"><img src="https://github.com/ironfeast-media/website-consulting/blob/main/public/images/linkedin-logo.png?raw=true" alt="LinkedIN" id="linkedin-logo"></a>
+            </div>
+            <div class="profile-text">
+                <h3>Dr. Ana Mesquita - Co-Founder & Strategic Lead</h3>
+                <p>Dr. Ana Mesquita contributes over 10 years of scientific research, project management, and grant development experience to Ironfeast Media. Throughout her career, she has built an extensive grant portfolio spanning multiple federal agencies, working across biomedical informatics, artificial intelligence applications, and life sciences.<br/>
+Her research background includes positions at Baylor College of Medicine focusing on Biomedical Informatics Research, innovative work at Singulomics Corporation in next-generation sequencing, and research at Albert Einstein College of Medicine in genetics. She has also served as Professor of Bioinformatics at Sarah Lawrence College, developing curricula in AI, CRISPR/Cas9, and data science.<br/>
+Dr. Mesquita earned her PhD in Molecular Biology and Biochemistry from Universidad Autónoma de Madrid and holds advanced degrees from the University of Porto. Her research has been published in peer-reviewed journals with over 3,000 citations, and she has received grants including the American Heart Association Postdoctoral Grant and Future of Science Grant.<br/>
+Her expertise in translating complex scientific concepts into clear, actionable strategies and her proven track record in stakeholder engagement position Ironfeast Media to deliver effective grant consulting and strategic communication services.
+</p>
+            </div>
+        </div>
+
+        <div class="profile-card reverse">
+            <div class="images">
+            <img src="https://github.com/ironfeast-media/website-consulting/blob/main/public/images/joao-photo.jpeg?raw=true" alt="Picture of Joao Pereira" id="self-picture">
+            <a href="https://www.linkedin.com/in/joaopapereira"><img src="https://github.com/ironfeast-media/website-consulting/blob/main/public/images/linkedin-logo.png?raw=true" alt="LinkedIN" id="linkedin-logo"></a>
+            </div>
+
+            <div class="profile-text">
+                <h3>João Pereira - Co-Founder & Technical Lead</h3>
+                <p>João brings over 15 years of software engineering expertise to Ironfeast Media, with extensive experience in cloud platforms, application development, and technical leadership. As a Senior Software Engineer and Technical Lead at VMware Tanzu (formerly Broadcom/Pivotal), he led the packaging and installation of enterprise platforms and designed solutions for the Carvel tool suite.<br/>
+His career spans multiple industries, from telecommunications work at Portugal Telecom and Ericsson Telecom to database development at Greenplum Database and agile software development at Pivotal Labs. At Hubert Company, he modernized e-commerce platforms and implemented continuous integration processes, while his open-source contributions demonstrate his commitment to collaborative development.<br/>
+João holds a Master's degree in Computer and Telematic Engineering from the University of Aveiro, Portugal. His experience mentoring developers through Agile Ventures for over a decade reflects his dedication to knowledge sharing and community building. He brings this combination of technical expertise and collaborative approach to Ironfeast Media's streaming and media solutions.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="sbir" class="container">
+        <h2>What is the SBIR/STTR Program?</h2>
+        <p>The Small Business Innovation Research (SBIR) and Small Business Technology Transfer (STTR) programs represent the largest source of federal funding for innovative small businesses in the United States. With an annual budget of approximately $4.3 billion, these programs encourage small businesses to engage in federal research and development with significant potential for commercialization.</p>
+
+        <h3>Eligibility Requirements</h3>
+        <p>To qualify for SBIR/STTR funding, your business must meet specific criteria:</p>
+
+        <h4>Business Structure & Location</h4>
+        <ul>
+        <li>Must be a for-profit business located in the United States</li>
+        <li>Meet small business definition (generally 500 or fewer employees, including affiliates)</li>
+        </ul>
+
+        <h4>Ownership Requirements</h4>
+        <ul>
+        <li>At least 51% owned and controlled by U.S. citizens, permanent residents, or qualifying small businesses</li>
+        </ul>
+
+        <h4>Principal Investigator</h4>
+        <ul>
+        <li><strong>SBIR</strong>: Principal Investigator must be primarily employed (at least 50%) by the small business</li>
+        <li><strong>STTR</strong>: Principal Investigator can be employed by either the small business or collaborating research institution</li>
+        </ul>
+
+        <h4>Research Focus</h4>
+        <ul>
+        <li>Projects must address agency-specific R&D topics and priorities</li>
+        <li>Must demonstrate potential for commercialization</li>
+        </ul>
+
+        <h3>Participating Federal Agencies</h3>
+        <p>Eleven federal agencies participate in the SBIR/STTR programs:</p>
+        <ul id="agencies-list">
+        <li><strong>Department of Defense (DOD)</strong> - Largest funding source</li>
+        <li><strong>Department of Health and Human Services (HHS)</strong> - NIH, CDC, FDA</li>
+        <li><strong>Department of Energy (DOE)</strong></li>
+        <li><strong>National Science Foundation (NSF)</strong></li>
+        <li><strong>NASA</strong></li>
+        <li><strong>Department of Agriculture (USDA)</strong></li>
+        <li><strong>Department of Transportation (DOT)</strong></li>
+        <li><strong>Department of Commerce (DOC)</strong> - NIST, NOAA</li>
+        <li><strong>Department of Homeland Security (DHS)</strong></li>
+        <li><strong>Environmental Protection Agency (EPA)</strong></li>
+        <li><strong>Department of Education (ED)</strong></li>
+        </ul>
+
+        <h2>Funding Structure and Award Amounts</h2>
+        <h3>Phase I: Proof of Concept</h3>
+        <ul>
+        <li><strong>Typical Awards</strong>: $75,000 - $750,000</li>
+        <li><strong>Duration</strong>: 3-9 months</li>
+        <li><strong>Purpose</strong>: Establish technical merit, feasibility, and commercial potential</li>
+        </ul>
+
+        <h3>Phase II: Development and Commercialization</h3>
+        <ul>
+        <li><strong>Typical Awards:</strong> $400,000 - $3,000,000</li>
+        <li><strong>Duration:</strong> 12-36 months</li>
+        <li><strong>Purpose:</strong> Continue R&D and move toward commercialization</li>
+        </ul>
+
+        <h3>Phase III: Commercial Application</h3>
+
+        <h2>Industry Focus Areas</h2>
+        <p>SBIR/STTR funding spans virtually every technology sector:</p>
+        <ul>
+            <li><strong>Defense & Security</strong>: Advanced materials, autonomous systems, cybersecurity, sensors, space technologies</li>
+            <li><strong>Healthcare & Life Sciences</strong>: Digital health, diagnostics, therapeutics, medical devices, biotechnology</li>
+            <li><strong>Energy & Environment</strong>: Renewable energy, storage systems, environmental monitoring, clean technologies</li>
+            <li><strong>Information Technology</strong>: AI/ML, quantum computing, advanced computing, telecommunications</li>
+            <li><strong>Transportation</strong>: Autonomous vehicles, safety systems, infrastructure, logistics solutions</li>
+            <li><strong>Agriculture</strong>: Precision farming, food safety, sustainable agriculture, rural development</li>
+        </ul>
+
+        <h2>Recent Trends and Opportunities</h2>
+        <p>Current SBIR/STTR priorities reflect national strategic interests:</p>
+        <ul>
+            <li>Artificial Intelligence and Machine Learning applications</li>
+            <li>Advanced manufacturing and materials</li>
+            <li>Climate change and environmental sustainability</li>
+            <li>Biotechnology and precision medicine</li>
+            <li>Cybersecurity and information assurance</li>
+        </ul>
+
+        <h2>Key Success Factors</h2>
+        <h3>Technical Excellence</h3>
+        <p>Your proposal must demonstrate:</p>
+        <ul>
+            <li>Clear understanding of the technical challenge</li>
+            <li>Innovative approach with competitive advantages</li>
+            <li>Feasible development timeline and milestones</li>
+            <li>Strong team with relevant expertise</li>
+        </ul>
+
+        <h3>Commercial Viability</h3>
+        <p>Agencies want to see:</p>
+        <ul>
+            <li>Market analysis and customer identification</li>
+            <li>Revenue projections and business model</li>
+            <li>Intellectual property strategy</li>
+            <li>Pathway to Phase III funding or private investment</li>
+        </ul>
+
+        <h3>Agency Alignment</h3>
+        <p>Successful proposals address:</p>
+        <ul>
+            <li>Specific agency mission requirements</li>
+            <li>Published technical priorities and gaps</li>
+            <li>Government customer needs and acquisition pathways</li>
+        </ul>
+    </section>
+ 
+    <section id="contact" class="container">
+        <h2>Contact Us</h2>
+        <p>Ready to explore how an SBIR grant can transform your business? Or simply want to learn more about our services? Fill out the form below, and we'll be in touch to discuss your project and goals.</p>
+        <div class="contact-form">
+            <form id="contact-form" action="#" method="post">
+                <div class="form-group">
+                    <label for="name">Your Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone">
+                </div>
+                <div class="form-group">
+                    <label for="message">What can we help you with?</label>
+                    <textarea id="message" name="message" required></textarea>
+                </div>
+                <button type="submit" class="submit-button">Send Message</button>
+            </form>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>&copy; 2025 Ironfeast Media, LLC. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        document.getElementById('contact-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            data.hash = "<%= hash %>";
+            fetch('./.netlify/functions/send_email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(result => {
+                alert('Thank you for your message! We will be in touch shortly.');
+                this.reset(); // Clear the form
+            })
+            .catch(error => {
+                console.error('Error submitting form:', error);
+                alert('There was a problem sending your message. Please try again later or contact us directly at contact@ironfeast.tv');
+            });
+                    });
+    </script>
+</body>
+</html>

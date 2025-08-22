@@ -1,0 +1,17 @@
+[functions]
+  external_node_modules = ["express"]
+  node_bundler = "esbuild"
+  included_files = ["public/**", "dist/**", "node_modules/**"]
+[[redirects]]
+  force = true
+  from = "/*"
+  status = 200
+  to = "/.netlify/functions/website/:splat"
+[[redirects]]
+  force = true
+  from = "/images"
+  status = 200
+  to = "/.netlify/functions/website/public/images/:splat"
+
+[[plugins]]
+  package = "@netlify/plugin-emails"

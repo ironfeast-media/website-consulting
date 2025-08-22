@@ -1,0 +1,21 @@
+{
+    "name": "ironfeast-website",
+    "version": "1.0.0",
+    "description": "Node.js project with Express and Nodemailer",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "build": "netlify build"
+    },
+    "dependencies": {
+        "@netlify/functions": "^4.2.4",
+        "@types/express": "^5.0.3",
+        "cross-env": "^7.0.3",
+        "ejs": "^3.1.9",
+        "express": "^4.21.2",
+        "nodemailer": "^6.9.8",
+        "serverless-http": "^3.2.0"
+    },
+    "author": "",
+    "license": "ISC"
+}
