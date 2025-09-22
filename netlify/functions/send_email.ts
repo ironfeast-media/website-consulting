@@ -33,7 +33,7 @@ const handler: Handler = async function(event) {
     body: JSON.stringify({
       from: "contactus@ironfeast.tv",
       to: process.env.CONTACT_US_EMAIL,
-      subject: "You've been subscribed",
+      subject: "New contact information",
       parameters: {
         name: requestBody.name,
         email: requestBody.email,
@@ -41,7 +41,15 @@ const handler: Handler = async function(event) {
         message: requestBody.message,
       },
     }),
+  }).catch((error) => {
+    console.error("Error sending email:", error);
+    return { 
+    statusCode: 500,
+    body: JSON.stringify("Unable to save contact information, please try again later."),
+   };
   });
+
+  console.log("Just sent email to", requestBody.email);
 
   return {
     statusCode: 200,
