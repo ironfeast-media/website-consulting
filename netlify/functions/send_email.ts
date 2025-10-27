@@ -41,7 +41,7 @@ const handler: Handler = async function(event) {
         message: requestBody.message,
       },
     }),
-  }).catch((error) => {
+  }).catch((error: any) => {
     console.error("Error sending email:", error);
     return { 
     statusCode: 500,
