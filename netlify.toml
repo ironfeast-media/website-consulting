@@ -1,5 +1,7 @@
 [functions]
   node_bundler = "esbuild"
+  # Include ejs as an external module so bundling/serving functions have it available
+  external_node_modules = ["ejs"]
   included_files = ["public/**", "dist/**"]
 [[redirects]]
   from = "/schedule"

@@ -9,8 +9,11 @@ const app = express();
 
 app.use(bodyParser.json());
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, '..', '..', 'public'));
-app.use(express.static(path.join(__dirname, '..', '..', 'public', 'images')));
+
+// Resolve public directory from project root so Netlify Dev / function runner finds views correctly
+const projectPublic = path.join(process.cwd(), 'public');
+app.set('views', projectPublic);
+app.use(express.static(path.join(projectPublic, 'images')));
 
 
 
