@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Sales Call - Ironfeast Consulting</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --background-color: #f4f6f9;
+            --text-color: #333;
+            --light-text-color: #ecf0f1;
+            --border-radius: 8px;
+            --success-color: #27ae60;
+            --error-color: #e74c3c;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
+            padding: 1rem 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--light-text-color);
+            text-decoration: none;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #555;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .info-box {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .info-box h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            font-size: 1.3rem;
+        }
+
+        .info-box p {
+            margin: 5px 0;
+        }
+
+        .meet-notice {
+            background-color: #e8f4f8;
+            border-left: 4px solid var(--secondary-color);
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: var(--border-radius);
+        }
+
+        .meet-notice strong {
+            color: var(--secondary-color);
+        }
+
+        .scheduling-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .scheduling-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .calendar-section, .form-section {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .calendar-section h2, .form-section h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--background-color);
+        }
+
+        .calendar-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .nav-button:hover:not(:disabled) {
+            background-color: #2980b9;
+        }
+
+        .nav-button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .time-slot {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: white;
+            font-weight: 500;
+        }
+
+        .time-slot:hover {
+            border-color: var(--secondary-color);
+            background-color: #e8f4f8;
+        }
+
+        .time-slot.selected {
+            background-color: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        .time-slot.unavailable {
+            background-color: #f0f0f0;
+            color: #999;
+            cursor: not-allowed;
+            border-color: #ddd;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .email-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .email-item {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .email-item input {
+            flex: 1;
+        }
+
+        .remove-email {
+            background-color: var(--error-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .remove-email:hover {
+            background-color: #c0392b;
+        }
+
+        .add-email {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        .add-email:hover {
+            background-color: #229954;
+        }
+
+        .submit-button {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .submit-button:hover:not(:disabled) {
+            background-color: #1a2431;
+        }
+
+        .submit-button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #555;
+        }
+
+        .error {
+            background-color: #fadbd8;
+            border-left: 4px solid var(--error-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+            color: var(--error-color);
+        }
+
+        .success {
+            background-color: #d5f4e6;
+            border-left: 4px solid var(--success-color);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: var(--border-radius);
+            color: var(--success-color);
+            text-align: center;
+        }
+
+        .success h2 {
+            color: var(--success-color);
+            margin-top: 0;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
+            margin-top: 40px;
+        }
+
+        .timezone-info {
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+            margin-top: 10px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <a href="/" class="logo">Ironfeast Consulting</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>Schedule Your Sales Call</h1>
+        <p class="subtitle">Choose a convenient time to discuss your project with our team</p>
+
+        <div class="meet-notice">
+            <strong>📹 This meeting will be conducted via Google Meet.</strong> You will receive a calendar invitation with the meeting link.
+        </div>
+
+        <div id="error-container"></div>
+
+        <div id="loading" class="loading">
+            <p>Loading your information and available time slots...</p>
+        </div>
+
+        <div id="info-section" style="display: none;">
+            <div class="info-box">
+                <h2>Meeting Details</h2>
+                <p><strong>Your Name:</strong> <span id="user-name"></span></p>
+                <p><strong>Your Email:</strong> <span id="user-email"></span></p>
+                <p><strong>Company:</strong> <span id="company-name"></span></p>
+                <p><strong>Discussion Topic:</strong> <span id="grant-type"></span></p>
+            </div>
+        </div>
+
+        <div id="scheduling-section" style="display: none;">
+            <div class="scheduling-container">
+                <div class="calendar-section">
+                    <h2>Select a Time Slot</h2>
+                    <div class="calendar-header">
+                        <button class="nav-button" id="prev-day" disabled>← Previous</button>
+                        <h3 id="current-date"></h3>
+                        <button class="nav-button" id="next-day">Next →</button>
+                    </div>
+                    <div class="timezone-info">All times shown in Central Time (CT)</div>
+                    <div id="time-slots" class="time-slots"></div>
+                </div>
+
+                <div class="form-section">
+                    <h2>Additional Attendees</h2>
+                    <p style="color: #666; font-size: 0.95rem; margin-bottom: 20px;">
+                        Add email addresses of other people who should attend this meeting (optional).
+                    </p>
+                    <div id="email-list" class="email-list">
+                        <!-- Email inputs will be added here -->
+                    </div>
+                    <button type="button" class="add-email" id="add-email-btn">+ Add Email</button>
+
+                    <button type="button" class="submit-button" id="schedule-btn" disabled>
+                        Schedule Meeting
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="success-section" style="display: none;">
+            <div class="success">
+                <h2>✓ Meeting Scheduled Successfully!</h2>
+                <p>You will receive a calendar invitation at <strong id="confirmation-email"></strong></p>
+                <p>Check your email for the Google Meet link and meeting details.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 Ironfeast Media, LLC. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        // State management
+        let state = {
+            token: null,
+            userInfo: null,
+            availableSlots: {},
+            currentDay: 0,
+            maxDays: 7,
+            selectedSlot: null,
+            additionalEmails: []
+        };
+
+        // Get token from URL
+        function getTokenFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('token');
+        }
+
+        // Format date
+        function formatDate(date) {
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`;
+        }
+
+        // Format time slot
+        function formatTimeSlot(isoString) {
+            const date = new Date(isoString);
+            let hours = date.getHours();
+            const minutes = date.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+            return `${hours}:${minutesStr} ${ampm}`;
+        }
+
+        // Show error
+        function showError(message) {
+            const errorContainer = document.getElementById('error-container');
+            errorContainer.innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        // Load available slots
+        async function loadAvailableSlots() {
+            try {
+                const response = await fetch(`/.netlify/functions/schedule-meeting?token=${state.token}`);
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to load available slots');
+                }
+
+                const data = await response.json();
+                
+                state.userInfo = data.userInfo;
+                state.availableSlots = data.slots;
+
+                // Update UI with user info
+                document.getElementById('user-name').textContent = data.userInfo.name;
+                document.getElementById('user-email').textContent = data.userInfo.email;
+                document.getElementById('company-name').textContent = data.userInfo.company;
+                document.getElementById('grant-type').textContent = data.userInfo.grantType;
+
+                // Show sections
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('info-section').style.display = 'block';
+                document.getElementById('scheduling-section').style.display = 'block';
+
+                // Render first day
+                renderTimeSlots();
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                showError(error.message);
+            }
+        }
+
+        // Get current date offset
+        function getCurrentDate() {
+            const date = new Date();
+            date.setDate(date.getDate() + state.currentDay);
+            date.setHours(0, 0, 0, 0);
+            return date;
+        }
+
+        // Render time slots
+        function renderTimeSlots() {
+            const currentDate = getCurrentDate();
+            const dateKey = currentDate.toISOString().split('T')[0];
+            
+            document.getElementById('current-date').textContent = formatDate(currentDate);
+            
+            const slots = state.availableSlots[dateKey] || [];
+            const container = document.getElementById('time-slots');
+            
+            if (slots.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">No available slots for this day</p>';
+            } else {
+                container.innerHTML = slots.map(slot => `
+                    <div class="time-slot" data-slot="${slot}">
+                        ${formatTimeSlot(slot)}
+                    </div>
+                `).join('');
+
+                // Add click handlers
+                container.querySelectorAll('.time-slot').forEach(slotEl => {
+                    slotEl.addEventListener('click', () => {
+                        container.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+                        slotEl.classList.add('selected');
+                        state.selectedSlot = slotEl.dataset.slot;
+                        document.getElementById('schedule-btn').disabled = false;
+                    });
+                });
+            }
+
+            // Update navigation buttons
+            document.getElementById('prev-day').disabled = state.currentDay === 0;
+            document.getElementById('next-day').disabled = state.currentDay >= state.maxDays - 1;
+        }
+
+        // Add email input
+        function addEmailInput(value = '') {
+            const emailList = document.getElementById('email-list');
+            const index = state.additionalEmails.length;
+            
+            const emailItem = document.createElement('div');
+            emailItem.className = 'email-item';
+            emailItem.innerHTML = `
+                <input type="email" placeholder="email@example.com" value="${value}" data-index="${index}">
+                <button type="button" class="remove-email" data-index="${index}">Remove</button>
+            `;
+            
+            emailList.appendChild(emailItem);
+            state.additionalEmails.push(value);
+
+            // Add event listeners
+            emailItem.querySelector('input').addEventListener('input', (e) => {
+                state.additionalEmails[e.target.dataset.index] = e.target.value;
+            });
+
+            emailItem.querySelector('.remove-email').addEventListener('click', (e) => {
+                const idx = parseInt(e.target.dataset.index);
+                state.additionalEmails.splice(idx, 1);
+                renderEmailList();
+            });
+        }
+
+        // Render email list
+        function renderEmailList() {
+            const emailList = document.getElementById('email-list');
+            emailList.innerHTML = '';
+            const emails = [...state.additionalEmails];
+            state.additionalEmails = [];
+            emails.forEach(email => addEmailInput(email));
+        }
+
+        // Schedule meeting
+        async function scheduleMeeting() {
+            if (!state.selectedSlot) {
+                showError('Please select a time slot');
+                return;
+            }
+
+            const scheduleBtn = document.getElementById('schedule-btn');
+            scheduleBtn.disabled = true;
+            scheduleBtn.textContent = 'Scheduling...';
+
+            try {
+                const response = await fetch('/.netlify/functions/schedule-meeting', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        token: state.token,
+                        timestamp: state.selectedSlot,
+                        additionalEmails: state.additionalEmails.filter(e => e && e.trim())
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to schedule meeting');
+                }
+
+                // Show success
+                document.getElementById('scheduling-section').style.display = 'none';
+                document.getElementById('info-section').style.display = 'none';
+                document.getElementById('success-section').style.display = 'block';
+                document.getElementById('confirmation-email').textContent = state.userInfo.email;
+
+            } catch (error) {
+                showError(error.message);
+                scheduleBtn.disabled = false;
+                scheduleBtn.textContent = 'Schedule Meeting';
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            state.token = getTokenFromURL();
+            
+            if (!state.token) {
+                document.getElementById('loading').style.display = 'none';
+                showError('Invalid or missing token. Please use the link provided in your email.');
+                return;
+            }
+
+            // Event listeners
+            document.getElementById('prev-day').addEventListener('click', () => {
+                state.currentDay--;
+                state.selectedSlot = null;
+                document.getElementById('schedule-btn').disabled = true;
+                renderTimeSlots();
+            });
+
+            document.getElementById('next-day').addEventListener('click', () => {
+                state.currentDay++;
+                state.selectedSlot = null;
+                document.getElementById('schedule-btn').disabled = true;
+                renderTimeSlots();
+            });
+
+            document.getElementById('add-email-btn').addEventListener('click', () => {
+                addEmailInput();
+            });
+
+            document.getElementById('schedule-btn').addEventListener('click', scheduleMeeting);
+
+            // Load data
+            loadAvailableSlots();
+        });
+    </script>
+</body>
+</html>

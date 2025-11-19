@@ -12,8 +12,16 @@ app.use(bodyParser.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'public'));
 
+// Serve static files from the `public` directory (images, static HTML, JS, CSS)
+app.use(express.static(path.join(__dirname, 'public')));
+
 app.get('/', (req, res) => {
     res.render('index', { hash: process.env.CONTACT_FORM_HASH || 'test' });
+});
+
+// Serve schedule page at both /schedule and /schedule.html
+app.get('/schedule', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'schedule.html'));
 });
 
 const transporter = nodemailer.createTransport({

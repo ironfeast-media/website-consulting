@@ -3,15 +3,23 @@
   node_bundler = "esbuild"
   included_files = ["public/**", "dist/**", "node_modules/**"]
 [[redirects]]
+  from = "/schedule"
+  to = "/public/schedule.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/images/*"
+  to = "/images/:splat"
+  status = 200
+  force = true
+
+  # Fallback: route everything else to the main website function
+[[redirects]]
   force = true
   from = "/*"
   status = 200
   to = "/.netlify/functions/website/:splat"
-[[redirects]]
-  force = true
-  from = "/images"
-  status = 200
-  to = "/.netlify/functions/website/public/images/:splat"
 
 [[plugins]]
   package = "@netlify/plugin-emails"

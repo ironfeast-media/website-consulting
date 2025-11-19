@@ -5,14 +5,18 @@
     "main": "index.js",
     "scripts": {
         "start": "node index.js",
-        "build": "netlify build"
+        "build": "netlify build",
+        "dev": "netlify dev"
     },
     "dependencies": {
+        "@netlify/blobs": "^10.4.1",
         "@netlify/functions": "^4.2.4",
         "@types/express": "^5.0.3",
         "cross-env": "^7.0.3",
         "ejs": "^3.1.9",
         "express": "^4.21.2",
+        "googleapis": "^166.0.0",
+        "luxon": "^3.7.2",
         "nodemailer": "^6.9.8",
         "serverless-http": "^3.2.0"
     },

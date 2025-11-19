@@ -302,9 +302,9 @@
         <h2>About Us</h2>
         <div class="profile-card">
             <div class="images">
-                <img src="https://github.com/ironfeast-media/website-consulting/blob/main/public/images/ana-photo.jpeg?raw=true" alt="Picture of Ana Mesquita, PhD" id="self-picture">
+                <img src="https://github.com/ironfeast-media/website-consulting/blob/main/public/images/ana-photo.jpeg?raw=true" data-src="https://raw.githubusercontent.com/ironfeast-media/website-consulting/main/public/images/ana-photo.jpeg" alt="Picture of Ana Mesquita, PhD" id="self-picture">
                 
-                <a href="https://www.linkedin.com/in/anamsq"><img src="https://github.com/ironfeast-media/website-consulting/blob/main/public/images/linkedin-logo.png?raw=true" alt="LinkedIN" id="linkedin-logo"></a>
+                <a href="https://www.linkedin.com/in/anamsq"><img src="https://github.com/ironfeast-media/website-consulting/blob/main/public/images/linkedin-logo.png?raw=true" data-src="https://raw.githubusercontent.com/ironfeast-media/website-consulting/main/public/images/linkedin-logo.png" alt="LinkedIN" id="linkedin-logo"></a>
             </div>
             <div class="profile-text">
                 <h3>Dr. Ana Mesquita - Co-Founder & Strategic Lead</h3>
@@ -318,8 +318,8 @@ Her expertise in translating complex scientific concepts into clear, actionable 
 
         <div class="profile-card reverse">
             <div class="images">
-            <img src="https://github.com/ironfeast-media/website-consulting/blob/main/public/images/joao-photo.jpeg?raw=true" alt="Picture of Joao Pereira" id="self-picture">
-            <a href="https://www.linkedin.com/in/joaopapereira"><img src="https://github.com/ironfeast-media/website-consulting/blob/main/public/images/linkedin-logo.png?raw=true" alt="LinkedIN" id="linkedin-logo"></a>
+            <img src="https://github.com/ironfeast-media/website-consulting/blob/main/public/images/joao-photo.jpeg?raw=true" data-src="https://raw.githubusercontent.com/ironfeast-media/website-consulting/main/public/images/joao-photo.jpeg" alt="Picture of Joao Pereira" id="self-picture">
+            <a href="https://www.linkedin.com/in/joaopapereira"><img src="https://github.com/ironfeast-media/website-consulting/blob/main/public/images/linkedin-logo.png?raw=true" data-src="https://raw.githubusercontent.com/ironfeast-media/website-consulting/main/public/images/linkedin-logo.png" alt="LinkedIN" id="linkedin-logo"></a>
             </div>
 
             <div class="profile-text">
@@ -474,6 +474,27 @@ João holds a Master's degree in Computer and Telematic Engineering from the Uni
     </footer>
 
     <script>
+        // Convert data-src -> full URL at runtime. If data-src is already an absolute URL use it,
+        // otherwise prefix with the site's origin (fallback for relative paths).
+        (function() {
+            try {
+                document.addEventListener('DOMContentLoaded', function() {
+                    document.querySelectorAll('img[data-src]').forEach(function(img) {
+                        var ds = img.getAttribute('data-src');
+                        if (ds) {
+                            if (/^https?:\/\//i.test(ds)) {
+                                img.src = ds;
+                            } else {
+                                img.src = window.location.origin + ds;
+                            }
+                        }
+                    });
+                });
+            } catch (e) {
+                // ignore
+            }
+        })();
+
         document.getElementById('contact-form').addEventListener('submit', function(event) {
             event.preventDefault();
 

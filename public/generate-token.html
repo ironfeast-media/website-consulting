@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Generator - Ironfeast Scheduling</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #e74c3c;
+            --background-color: #f4f6f9;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 0;
+            margin-bottom: 30px;
+        }
+
+        .navbar {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .submit-button {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .submit-button:hover:not(:disabled) {
+            background-color: #1a2431;
+        }
+
+        .submit-button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .result-container {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #d5f4e6;
+            border-left: 4px solid var(--success-color);
+            border-radius: var(--border-radius);
+        }
+
+        .result-container h2 {
+            color: var(--success-color);
+            margin-top: 0;
+        }
+
+        .url-box {
+            background-color: white;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            word-break: break-all;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #ddd;
+        }
+
+        .copy-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .copy-button:hover {
+            background-color: #2980b9;
+        }
+
+        .error {
+            background-color: #fadbd8;
+            border-left: 4px solid var(--error-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+            color: var(--error-color);
+            display: none;
+        }
+
+        .info-box {
+            background-color: #e8f4f8;
+            border-left: 4px solid var(--secondary-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <a href="/" class="logo">Ironfeast Consulting</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>Generate Scheduling Token</h1>
+
+        <div class="info-box">
+            <strong>About This Tool:</strong> Generate a unique scheduling link for prospects to book a sales call. 
+            The link expires after 5 days.
+        </div>
+
+        <div id="error-container" class="error"></div>
+
+        <div class="form-container">
+            <form id="token-form">
+                <div class="form-group">
+                    <label for="name">Prospect Name *</label>
+                    <input type="text" id="name" name="name" required placeholder="John Doe">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Prospect Email *</label>
+                    <input type="email" id="email" name="email" required placeholder="john@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="company">Company Name *</label>
+                    <input type="text" id="company" name="company" required placeholder="Example Corp">
+                </div>
+
+                <div class="form-group">
+                    <label for="grantType">Discussion Topic / Grant Type *</label>
+                    <select id="grantType" name="grantType" required>
+                        <option value="">Select a topic...</option>
+                        <option value="SBIR Phase I">SBIR Phase I</option>
+                        <option value="SBIR Phase II">SBIR Phase II</option>
+                        <option value="STTR Phase I">STTR Phase I</option>
+                        <option value="STTR Phase II">STTR Phase II</option>
+                        <option value="General Consulting">General Consulting</option>
+                        <option value="Grant Writing Services">Grant Writing Services</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="submit-button" id="submit-btn">
+                    Generate Scheduling Link
+                </button>
+            </form>
+        </div>
+
+        <div id="result-container" class="result-container">
+            <h2>✓ Token Generated Successfully!</h2>
+            <p><strong>Send this link to the prospect:</strong></p>
+            <div class="url-box" id="scheduling-url"></div>
+            <button class="copy-button" id="copy-btn">Copy Link</button>
+            
+            <p style="margin-top: 20px;"><strong>Token Details:</strong></p>
+            <ul>
+                <li><strong>Name:</strong> <span id="result-name"></span></li>
+                <li><strong>Email:</strong> <span id="result-email"></span></li>
+                <li><strong>Company:</strong> <span id="result-company"></span></li>
+                <li><strong>Topic:</strong> <span id="result-grant"></span></li>
+                <li><strong>Expires:</strong> 5 days from now</li>
+            </ul>
+
+            <button class="submit-button" onclick="location.reload()" style="margin-top: 20px;">
+                Generate Another Token
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function showError(message) {
+            const errorContainer = document.getElementById('error-container');
+            errorContainer.textContent = message;
+            errorContainer.style.display = 'block';
+        }
+
+        function hideError() {
+            const errorContainer = document.getElementById('error-container');
+            errorContainer.style.display = 'none';
+        }
+
+        document.getElementById('token-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideError();
+
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Generating...';
+
+            try {
+                const response = await fetch('/.netlify/functions/add-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to generate token');
+                }
+
+                const result = await response.json();
+
+                // Show result
+                document.getElementById('scheduling-url').textContent = result.schedulingUrl;
+                document.getElementById('result-name').textContent = data.name;
+                document.getElementById('result-email').textContent = data.email;
+                document.getElementById('result-company').textContent = data.company;
+                document.getElementById('result-grant').textContent = data.grantType;
+
+                document.querySelector('.form-container').style.display = 'none';
+                document.getElementById('result-container').style.display = 'block';
+
+            } catch (error) {
+                showError(error.message);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Generate Scheduling Link';
+            }
+        });
+
+        document.getElementById('copy-btn').addEventListener('click', () => {
+            const url = document.getElementById('scheduling-url').textContent;
+            navigator.clipboard.writeText(url).then(() => {
+                const btn = document.getElementById('copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>
