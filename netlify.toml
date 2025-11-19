@@ -1,7 +1,6 @@
 [functions]
-  external_node_modules = ["express"]
   node_bundler = "esbuild"
-  included_files = ["public/**", "dist/**", "node_modules/**"]
+  included_files = ["public/**", "dist/**"]
 [[redirects]]
   from = "/schedule"
   to = "/public/schedule.html"

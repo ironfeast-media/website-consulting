@@ -1,4 +1,5 @@
-module.exports = require('./add-token/index.js');
+const { getStore } = require('@netlify/blobs');
+const crypto = require('crypto');
 
 // Generate a unique token
 function generateToken() {
@@ -33,8 +34,6 @@ exports.handler = async (event) => {
   }
 
   // Basic auth check: expect an Authorization header with the token.
-  // The expected token string should be set in the environment as `FN_AUTH_TOKEN`.
-  // Accept either a raw token in the header or a `Basic <token>` value.
   const authHeader = (event.headers && (event.headers.authorization || event.headers.Authorization)) || '';
   const expectedToken = process.env.FN_AUTH_TOKEN || '';
 
@@ -71,7 +70,7 @@ exports.handler = async (event) => {
       body: JSON.stringify({ error: 'Unauthorized' })
     };
   }
-  
+
   try {
     const body = JSON.parse(event.body);
     const { name, email, company, grantType, token } = body;
@@ -121,6 +120,30 @@ exports.handler = async (event) => {
     
     // Generate scheduling URL
     const siteUrl = process.env.URL || 'http://localhost:8888';
-    // Stub loader: delegate to folder-based function so Netlify can install per-function deps
-    module.exports = require('./add-token/index.js');
+    const schedulingUrl = `${siteUrl}/schedule.html?token=${finalToken}`;
+    
     return {
+      statusCode: 200,
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        success: true,
+        token: finalToken,
+        schedulingUrl: schedulingUrl,
+        expiresIn: '5 days'
+      })
+    };
+  } catch (error) {
+    console.error('Error adding token:', error);
+    return {
+      statusCode: 500,
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ error: 'Failed to create token' })
+    };
+  }
+};

@@ -1,0 +1,10 @@
+{
+  "name": "schedule-meeting-fn",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "googleapis": "^118.0.0",
+    "luxon": "^3.0.0",
+    "@netlify/blobs": "^1.0.0"
+  }
+}
