@@ -4,14 +4,37 @@ const { DateTime } = require('luxon');
 
 // Initialize Google Calendar
 function getCalendarClient() {
-  const credentials = JSON.parse(process.env.GOOGLE_CALENDAR_CREDENTIALS || '{}');
-  
-  const auth = new google.auth.GoogleAuth({
-    credentials,
-    scopes: ['https://www.googleapis.com/auth/calendar']
-  });
-  
-  return google.calendar({ version: 'v3', auth });
+  // Prefer OAuth2 with refresh token (suitable when you don't have a service account JSON)
+  const oauthClientId = process.env.GOOGLE_CLIENT_ID;
+  const oauthClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const oauthRefreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+
+  if (oauthClientId && oauthClientSecret && oauthRefreshToken) {
+    const oAuth2Client = new google.auth.OAuth2(oauthClientId, oauthClientSecret);
+    oAuth2Client.setCredentials({ refresh_token: oauthRefreshToken });
+    return google.calendar({ version: 'v3', auth: oAuth2Client });
+  }
+
+  // Fallback: service account credentials (JSON string in env)
+  if (process.env.GOOGLE_CALENDAR_CREDENTIALS) {
+    let credentials = {};
+    try {
+      credentials = JSON.parse(process.env.GOOGLE_CALENDAR_CREDENTIALS);
+    } catch (e) {
+      console.warn('Invalid GOOGLE_CALENDAR_CREDENTIALS JSON');
+      credentials = {};
+    }
+
+    const auth = new google.auth.GoogleAuth({
+      credentials,
+      scopes: ['https://www.googleapis.com/auth/calendar']
+    });
+
+    return google.calendar({ version: 'v3', auth });
+  }
+
+  // No valid auth configuration found
+  throw new Error('No Google Calendar authentication configured. Set GOOGLE_REFRESH_TOKEN (with CLIENT_ID/SECRET) or GOOGLE_CALENDAR_CREDENTIALS.');
 }
 
 // Get token data from Netlify Blobs
