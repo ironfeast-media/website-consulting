@@ -165,45 +165,56 @@ router.post('/grant-builder', async (req, res) => {
 	renderBuilder(req, res, { forceUnlocked: true });
 });
 
-// Tells Ana a new lead used the builder. Reuses the transporter above directly
-// rather than making an HTTP round-trip to /send-email in this same app.
-function notifyLead(name, email) {
-	return transporter.sendMail({
-		to: 'ana@ironfeast.org',
-		subject: `Grant Builder lead: ${name}`,
-		html: `
-			<p>Someone just unlocked the Grant Opportunity Prompt Builder.</p>
-			<p><strong>Name:</strong> ${name}</p>
-			<p><strong>Email:</strong> ${email}</p>
-		`
-	});
-}
+// Both builder emails go through the Netlify Emails plugin (Mailgun), which is the
+// path the live contact form already uses. The nodemailer transporter above is left
+// alone for /send-email, but is deliberately NOT used here: nothing currently calls
+// that route, so it is unproven in production.
+//
+// Mailgun only accepts a `from` on a domain verified with it, and the verified domain
+// is ironfeast.tv — which is why the sender here is a .tv address even though the site
+// is ironfeast.org. Override via env once ironfeast.org is verified with Mailgun.
+const MAIL_FROM = process.env.BUILDER_MAIL_FROM || 'contactus@ironfeast.tv';
+const LEAD_NOTIFY_TO = process.env.CONTACT_US_EMAIL || 'ana@ironfeast.tv';
 
-// Sends the visitor their confirmation through the Netlify Emails plugin.
-async function sendBuilderConfirmation(name, email) {
+async function sendPluginEmail(template, payload) {
 	if (!process.env.NETLIFY_EMAILS_SECRET || !process.env.URL) {
 		throw new Error('NETLIFY_EMAILS_SECRET or URL is not set');
 	}
-	const response = await fetch(`${process.env.URL}/.netlify/functions/emails/grant-builder`, {
+	const response = await fetch(`${process.env.URL}/.netlify/functions/emails/${template}`, {
 		method: 'POST',
 		headers: {
 			'netlify-emails-secret': process.env.NETLIFY_EMAILS_SECRET,
 			'Content-Type': 'application/json'
 		},
-		body: JSON.stringify({
-			from: 'ana@ironfeast.org',
-			to: email,
-			subject: 'Your Grant Opportunity Prompt Builder link',
-			parameters: {
-				name,
-				builderUrl: `${SITE_BASE}/grant-builder`,
-				scheduleUrl: `${SITE_BASE}/schedule`
-			}
-		})
+		body: JSON.stringify(Object.assign({ from: MAIL_FROM }, payload))
 	});
 	if (!response.ok) {
-		throw new Error(`Emails function returned ${response.status}`);
+		throw new Error(`Emails function returned ${response.status} for template "${template}"`);
 	}
+}
+
+// Tells Ana a new lead used the builder.
+function notifyLead(name, email) {
+	return sendPluginEmail('grant-builder-lead', {
+		// The plugin only forwards from/to/cc/bcc/subject/html/attachments, so there is
+		// no replyTo. The template makes the lead's address a mailto: link instead.
+		to: LEAD_NOTIFY_TO,
+		subject: `Grant Builder lead: ${name}`,
+		parameters: { name, email }
+	});
+}
+
+// Sends the visitor their confirmation.
+function sendBuilderConfirmation(name, email) {
+	return sendPluginEmail('grant-builder', {
+		to: email,
+		subject: 'Your Grant Opportunity Prompt Builder link',
+		parameters: {
+			name,
+			builderUrl: `${SITE_BASE}/grant-builder`,
+			scheduleUrl: `${SITE_BASE}/schedule`
+		}
+	});
 }
 
 // On a builder subdomain, everything that is not the builder belongs on the main site.

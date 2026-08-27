@@ -32,11 +32,11 @@ Verified pre-conditions:
 |---|---|
 | Audience | Public lead magnet, email-gated |
 | Gate timing | Before the form loads |
-| Lead delivery | Notify Ana **and** send the visitor a templated confirmation |
+| Lead delivery | Notify Ana **and** send the visitor a templated confirmation, both via Mailgun |
 | Design fit | Site header/footer **copied** into the new pages; builder interior untouched |
 | Modes | Keep both; default to **For-Profit** |
 | Canonical domain | `ironfeast.org` |
-| Confirmation sender | `ana@ironfeast.org` |
+| Mail sender (both) | `contactus@ironfeast.tv` — the Mailgun-verified domain |
 | URL | `/grant-builder`, subdomain-ready |
 
 ## Architecture
@@ -116,15 +116,32 @@ already has.
 
 ### Email delivery
 
-**To Ana** — call the nodemailer transporter already constructed at module scope in
-`netlify/functions/website/index.js` (from `EMAIL_ADDRESS` / `EMAIL_PASSWORD`) directly
-with new `mailOptions`, rather than making an HTTP `POST /send-email` round-trip to the
-same express app. Recipient `ana@ironfeast.org`, matching the existing contact form.
+Both emails go through the **Netlify Emails plugin, backed by Mailgun** — the path the
+live contact form already uses (`index.ejs:505` posts to `/.netlify/functions/send_email`).
 
-**To the visitor** — the Netlify Emails plugin, via a new template at
-`emails/grant-builder/index.html`. `[functions.emails] included_files = ["./emails/**"]`
-is already configured, so the template is picked up automatically. Sender:
-`ana@ironfeast.org`.
+The repo also contains a nodemailer/Gmail transporter and a `POST /send-email` route in
+the same function, but **nothing calls that route** — not the homepage, not `schedule.html`.
+It is unproven in production, and commit `936514b` ("change to use oauth") suggests the
+Gmail credentials may no longer be current. The builder therefore does not use it, so a
+lead notification cannot fail silently on an untested path. The transporter and route are
+left in place, untouched.
+
+- **To Ana** — template `emails/grant-builder-lead/index.html`, delivered to
+  `CONTACT_US_EMAIL` (currently `ana@ironfeast.tv`).
+- **To the visitor** — template `emails/grant-builder/index.html`.
+
+`[functions.emails] included_files = ["./emails/**"]` is already configured, so both
+templates are picked up automatically.
+
+**Sender is `contactus@ironfeast.tv`, not an `@ironfeast.org` address.** Mailgun only
+accepts a `from` on a domain verified with it, and the verified domain is `ironfeast.tv`
+— which is why the pre-existing contact template also sends from `.tv` while the site
+itself is `ironfeast.org`. `BUILDER_MAIL_FROM` overrides this without a code change once
+`ironfeast.org` is verified with Mailgun.
+
+**The plugin forwards only `from`, `to`, `cc`, `bcc`, `subject`, `html` and
+`attachments`** — there is no `replyTo`, so one passed in would be silently dropped. The
+lead template makes the visitor's address a `mailto:` link instead.
 
 The `CONTACT_FORM_HASH` guard does not transfer — it exists because `/send-email` is
 publicly callable, and on a gate form it would be ceremony. Its absence leaves the
@@ -164,6 +181,7 @@ clobbered.
 - `public/grant-builder.ejs` — the tool, wrapped in site chrome
 - `public/grant-builder-gate.ejs` — the email gate
 - `emails/grant-builder/index.html` — visitor confirmation template
+- `emails/grant-builder-lead/index.html` — Ana's lead notification template
 
 **Modified**
 - `netlify/functions/website/index.js` — host detection, three routes, cookie handling,
@@ -181,7 +199,10 @@ clobbered.
 | `BUILDER_HOSTS` | Comma-separated hostnames that serve the builder at `/` | **New**; empty until the subdomain exists |
 | `SITE_BASE` | Canonical origin for absolute links and canonical tags; defaults to `https://ironfeast.org` | **New** |
 | `EMAIL_ADDRESS`, `EMAIL_PASSWORD` | Existing nodemailer Gmail credentials | Existing |
+| `BUILDER_MAIL_FROM` | Sender for both builder emails; must be on a Mailgun-verified domain. Defaults to `contactus@ironfeast.tv` | **New** |
+| `CONTACT_US_EMAIL` | Where lead notifications land. Defaults to `ana@ironfeast.tv` | Existing |
 | `NETLIFY_EMAILS_SECRET`, `URL` | Used by the Netlify Emails plugin | Existing |
+| `NETLIFY_EMAILS_PROVIDER`, `NETLIFY_EMAILS_PROVIDER_API_KEY`, `NETLIFY_EMAILS_MAILGUN_DOMAIN`, `NETLIFY_EMAILS_MAILGUN_HOST_REGION` | Mailgun config for the plugin | Existing |
 
 ## Error handling
 
@@ -210,8 +231,10 @@ clobbered.
 
 ## Open risks
 
-1. `ana@ironfeast.org` must be verified as a sender with the Emails provider, or every
-   confirmation bounces. This is an account-side task.
+1. ~~Sender verification~~ — **resolved**: both emails send from `contactus@ironfeast.tv`,
+   already proven working by the live contact form. Switching to an `@ironfeast.org`
+   sender requires verifying that domain with Mailgun first, then setting
+   `BUILDER_MAIL_FROM`.
 2. A client-side "copy" is still reachable to anyone who unlocks once; the gate is a
    lead-capture device, not access control. Accepted.
 3. ~~Editing the live `index.ejs` for the chrome refactor~~ — **resolved**: the chrome is
@@ -229,3 +252,5 @@ Discovered while building, worth keeping:
   `setUnlockCookie` keys off the hostname instead.
 - The honeypot unlocks **silently** rather than showing an error, so a bot cannot learn
   which field trapped it.
+- `EMAIL_ADDRESS` / `EMAIL_PASSWORD` are **not** required by this feature. Only the
+  Mailgun-backed plugin vars matter.
