@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Grant Opportunity Prompt Builder v3.0</title>
-<meta name="description" content="Build a research-grade AI prompt for finding grant opportunities — nonprofit or for-profit. A free tool from Ironfeast Consulting.">
+<meta name="description" content="A free tool from Ironfeast Consulting that writes you an AI prompt for finding grants your organization actually qualifies for.">
 <link rel="canonical" href="<%= siteBase %>/grant-builder">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,9 +35,9 @@
     --accent: #2563eb;
     --accentDim: #dbeafe;
     --accentGlow: rgba(37,99,235,0.15);
-    --headerA: #1e3a8a;
-    --headerB: #2563eb;
-    --headerC: #3b82f6;
+    --headerA: #2c3e50;
+    --headerB: #2c4a63;
+    --headerC: #3498db;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -180,7 +180,6 @@
     background-color: #2c3e50;
     color: #ecf0f1;
     padding: 1rem 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
   .site-nav-inner {
@@ -297,9 +296,9 @@
 <!-- ── HEADER ── -->
 <div class="header">
   <div class="header-inner">
-    <div class="eyebrow" id="hdr-eyebrow">🔍 Grant Intelligence · v3.0</div>
+    <div class="eyebrow" id="hdr-eyebrow">Grant research · v3.0</div>
     <h1>Grant Opportunity <span>Prompt Builder</span></h1>
-    <p id="hdr-desc">Fill in your organization's details. Get a research-grade AI prompt with role framing, chain-of-thought reasoning, and built-in hallucination controls — ready to paste into any AI.</p>
+    <p id="hdr-desc">Tell us about your organization and we will write the prompt for you. Paste it into whichever AI you already use and you get back a ranked list of funders worth your time.</p>
     <div class="hbadges">
       <span class="hbadge">🎭 Role Framing</span>
       <span class="hbadge">🧠 Chain-of-Thought</span>
@@ -826,25 +825,25 @@ function setMode(mode) {
     r.setProperty('--accent',    '#059669');
     r.setProperty('--accentDim', '#d1fae5');
     r.setProperty('--accentGlow','rgba(5,150,105,0.15)');
-    r.setProperty('--headerA',   '#064e3b');
-    r.setProperty('--headerB',   '#059669');
-    r.setProperty('--headerC',   '#34d399');
+    r.setProperty('--headerA',   '#2c3e50');
+    r.setProperty('--headerB',   '#2a5348');
+    r.setProperty('--headerC',   '#16a085');
   } else {
     r.setProperty('--accent',    '#2563eb');
     r.setProperty('--accentDim', '#dbeafe');
     r.setProperty('--accentGlow','rgba(37,99,235,0.15)');
-    r.setProperty('--headerA',   '#1e3a8a');
-    r.setProperty('--headerB',   '#2563eb');
-    r.setProperty('--headerC',   '#3b82f6');
+    r.setProperty('--headerA',   '#2c3e50');
+    r.setProperty('--headerB',   '#2c4a63');
+    r.setProperty('--headerC',   '#3498db');
   }
 
   // update dynamic text
   document.getElementById('hdr-eyebrow').textContent = mode === 'fp'
-    ? '🏢 For-Profit Grant Intelligence · v3.0'
-    : '🏛️ Nonprofit Grant Intelligence · v3.0';
+    ? 'For-profit grant research · v3.0'
+    : 'Nonprofit grant research · v3.0';
   document.getElementById('hdr-desc').textContent = mode === 'fp'
-    ? 'Enter your company\'s details. Get a research-grade AI prompt optimized for SBIR/STTR, federal R&D grants, state economic development programs, and corporate innovation funding.'
-    : 'Fill in your org\'s details. Get a research-grade AI prompt with role framing, chain-of-thought reasoning, and built-in hallucination controls — ready to paste into any AI.';
+    ? 'Tell us about your company and we will write the prompt for you. It is tuned for SBIR/STTR, federal R&D money, state economic development programs and corporate innovation funds.'
+    : 'Tell us about your organization and we will write the prompt for you. Paste it into whichever AI you already use and you get back a ranked list of funders worth your time.';
   document.getElementById('mode-label').textContent = mode === 'fp'
     ? 'SBIR/STTR, federal R&D, state economic development & corporate innovation'
     : 'Foundations, government, corporate grants & giving programs';
@@ -1126,13 +1125,13 @@ document.addEventListener('DOMContentLoaded', () => setMode('fp'));
 </script>
 
 <section class="site-cta">
-  <h2>Want us to actually run this for you?</h2>
-  <p>The prompt gets you a shortlist. Turning that shortlist into a funded application is what we do &mdash; Ironfeast has guided founders and researchers through SBIR/STTR and federal grant submissions from first draft to award.</p>
-  <a class="site-cta-btn" href="<%= siteBase %>/schedule">Book a free call</a>
+  <h2>Want help with the application itself?</h2>
+  <p>A good prompt gets you a shortlist. Writing the proposal is the part that takes months. We have taken founders and researchers through SBIR/STTR and other federal grants, from a blank page to an award.</p>
+  <a class="site-cta-btn" href="<%= siteBase %>/schedule">Talk to us</a>
 </section>
 
 <footer class="site-footer">
-  <p>&copy; 2026 Ironfeast Consulting. All Rights Reserved.</p>
+  <p>&copy; <%= year %> Ironfeast Media, LLC. All Rights Reserved.</p>
 </footer>
 </body>
 </html>

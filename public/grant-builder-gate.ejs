@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Grant Opportunity Prompt Builder | Ironfeast Consulting</title>
-<meta name="description" content="Build a research-grade AI prompt for finding grant opportunities — nonprofit or for-profit. A free tool from Ironfeast Consulting.">
+<meta name="description" content="A free tool from Ironfeast Consulting that writes you an AI prompt for finding grants your organization actually qualifies for.">
 <link rel="canonical" href="<%= siteBase %>/grant-builder">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -132,18 +132,18 @@
 
 <main class="gate-wrap">
   <div class="gate">
-    <div class="eyebrow">Grant Intelligence &middot; v3.0</div>
+    <div class="eyebrow">Grant research &middot; v3.0</div>
     <h1>Grant Opportunity <span>Prompt Builder</span></h1>
     <p class="lede">
-      Answer a few questions about your organization and get a research-grade AI prompt
-      built to surface grant opportunities you actually qualify for &mdash; ready to paste
-      into any AI.
+      Answer some questions about your organization. You get back a prompt to paste into
+      whichever AI you already use, written to find grants you qualify for rather than
+      grants that merely sound relevant.
     </p>
     <ul>
-      <li>Role framing and chain-of-thought reasoning built in</li>
-      <li>Hallucination controls, so it stops inventing funders</li>
-      <li>Separate modes for for-profit and nonprofit applicants</li>
-      <li>Free, and yours to reuse as often as you like</li>
+      <li>It checks your eligibility before it recommends anything</li>
+      <li>Funders the AI is unsure about get dropped, not used as padding</li>
+      <li>Results come back as a table with award ranges and deadlines</li>
+      <li>Works whether you are a company or a nonprofit</li>
     </ul>
 
     <% if (typeof error !== 'undefined' && error) { %>
@@ -165,21 +165,21 @@
         <label for="company_website">Leave this field empty</label>
         <input type="text" id="company_website" name="company_website" tabindex="-1" autocomplete="off">
       </div>
-      <button type="submit" class="submit">Open the builder</button>
+      <button type="submit" class="submit">Start building</button>
     </form>
 
     <p class="fineprint">
       <% if (typeof sendsConfirmation !== 'undefined' && sendsConfirmation) { %>
-        We will email you a copy of the link. No spam, and we will not share your address.
+        We will email you the link so you can come back to it. No spam, and we never share your address.
       <% } else { %>
-        No spam, and we will not share your address.
+        No spam, and we never share your address.
       <% } %>
     </p>
   </div>
 </main>
 
 <footer class="site-footer">
-  <p>&copy; 2026 Ironfeast Consulting. All Rights Reserved.</p>
+  <p>&copy; <%= year %> Ironfeast Media, LLC. All Rights Reserved.</p>
 </footer>
 
 </body>

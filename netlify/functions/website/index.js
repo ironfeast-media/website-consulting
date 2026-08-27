@@ -24,6 +24,9 @@ const SITE_BASE = (process.env.SITE_BASE || 'https://ironfeast.org').replace(/\/
 const UNLOCK_COOKIE = 'if_builder';
 const UNLOCK_MAX_AGE = 60 * 60 * 24 * 90; // 90 days
 
+// Footer copyright year, so no page goes stale on 1 January.
+const currentYear = () => new Date().getFullYear();
+
 const isBuilderHost = req => BUILDER_HOSTS.includes(String(req.hostname || '').toLowerCase());
 
 // Single presence-flag cookie, so a tiny inline parse beats adding cookie-parser
@@ -67,7 +70,7 @@ const router = express.Router();
 router.get('/', (req, res) => {
 	// On a dedicated builder subdomain, "/" is the builder rather than the homepage.
 	if (isBuilderHost(req)) return renderBuilder(req, res);
-	res.render('index', { hash: process.env.CONTACT_FORM_HASH || 'test' });
+	res.render('index', { hash: process.env.CONTACT_FORM_HASH || 'test', year: currentYear() });
 });
 
 const transporter = nodemailer.createTransport({
@@ -114,13 +117,14 @@ function renderBuilder(req, res, opts) {
 	if (!options.forceUnlocked && !hasUnlock(req)) {
 		return res.render('grant-builder-gate', {
 			siteBase: SITE_BASE,
+			year: currentYear(),
 			error: options.error || null,
 			values: options.values || { name: '', email: '' },
 			// The gate must not promise an email we are not going to send.
 			sendsConfirmation: SEND_CONFIRMATION
 		});
 	}
-	res.render('grant-builder', { siteBase: SITE_BASE });
+	res.render('grant-builder', { siteBase: SITE_BASE, year: currentYear() });
 }
 
 router.get('/grant-builder', (req, res) => renderBuilder(req, res));
