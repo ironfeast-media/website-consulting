@@ -32,7 +32,7 @@ Verified pre-conditions:
 |---|---|
 | Audience | Public lead magnet, email-gated |
 | Gate timing | Before the form loads |
-| Lead delivery | Notify Ana **and** send the visitor a templated confirmation, both via Mailgun |
+| Lead delivery | Notify Ana at `ana@ironfeast.tv` via Mailgun. Visitor confirmation is built but **off by default** — see the sandbox constraint below |
 | Design fit | Site header/footer **copied** into the new pages; builder interior untouched |
 | Modes | Keep both; default to **For-Profit** |
 | Canonical domain | `ironfeast.org` |
@@ -127,8 +127,24 @@ lead notification cannot fail silently on an untested path. The transporter and 
 left in place, untouched.
 
 - **To Ana** — template `emails/grant-builder-lead/index.html`, delivered to
-  `CONTACT_US_EMAIL` (currently `ana@ironfeast.tv`).
-- **To the visitor** — template `emails/grant-builder/index.html`.
+  `BUILDER_LEAD_TO`, falling back to `CONTACT_US_EMAIL` (currently `ana@ironfeast.tv`).
+- **To the visitor** — template `emails/grant-builder/index.html`. **Disabled by
+  default**, see below.
+
+### The Mailgun sandbox constraint
+
+The Mailgun domain in use is a **sandbox**, which delivers only to a short list of
+*authorized recipients*. Ana is on that list, which is why the existing contact form
+works — it only ever mails her. A Grant Builder visitor who just typed their address
+into the gate never is, so their confirmation would be rejected on every send.
+
+The visitor confirmation is therefore built, templated and tested, but gated behind
+`BUILDER_SEND_CONFIRMATION`, which defaults to **false**. Ana's notification always
+sends. Once a real domain is verified with Mailgun, setting that var to `true` turns
+confirmations on with no code change.
+
+The gate's fine print is driven by the same flag: with confirmations off it does not
+promise an email, because promising one we cannot deliver would be a lie to the visitor.
 
 `[functions.emails] included_files = ["./emails/**"]` is already configured, so both
 templates are picked up automatically.
@@ -200,7 +216,9 @@ clobbered.
 | `SITE_BASE` | Canonical origin for absolute links and canonical tags; defaults to `https://ironfeast.org` | **New** |
 | `EMAIL_ADDRESS`, `EMAIL_PASSWORD` | Existing nodemailer Gmail credentials | Existing |
 | `BUILDER_MAIL_FROM` | Sender for both builder emails; must be on a Mailgun-verified domain. Defaults to `contactus@ironfeast.tv` | **New** |
-| `CONTACT_US_EMAIL` | Where lead notifications land. Defaults to `ana@ironfeast.tv` | Existing |
+| `BUILDER_LEAD_TO` | Where lead notifications land. Falls back to `CONTACT_US_EMAIL`, then `ana@ironfeast.tv` | **New** |
+| `BUILDER_SEND_CONFIRMATION` | `true` enables the visitor confirmation. Off while Mailgun is a sandbox | **New** |
+| `CONTACT_US_EMAIL` | Existing contact-form recipient; the lead fallback | Existing |
 | `NETLIFY_EMAILS_SECRET`, `URL` | Used by the Netlify Emails plugin | Existing |
 | `NETLIFY_EMAILS_PROVIDER`, `NETLIFY_EMAILS_PROVIDER_API_KEY`, `NETLIFY_EMAILS_MAILGUN_DOMAIN`, `NETLIFY_EMAILS_MAILGUN_HOST_REGION` | Mailgun config for the plugin | Existing |
 

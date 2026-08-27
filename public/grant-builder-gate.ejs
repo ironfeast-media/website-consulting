@@ -169,7 +169,11 @@
     </form>
 
     <p class="fineprint">
-      We will email you a copy of the link. No spam, and we will not share your address.
+      <% if (typeof sendsConfirmation !== 'undefined' && sendsConfirmation) { %>
+        We will email you a copy of the link. No spam, and we will not share your address.
+      <% } else { %>
+        No spam, and we will not share your address.
+      <% } %>
     </p>
   </div>
 </main>

@@ -115,7 +115,9 @@ function renderBuilder(req, res, opts) {
 		return res.render('grant-builder-gate', {
 			siteBase: SITE_BASE,
 			error: options.error || null,
-			values: options.values || { name: '', email: '' }
+			values: options.values || { name: '', email: '' },
+			// The gate must not promise an email we are not going to send.
+			sendsConfirmation: SEND_CONFIRMATION
 		});
 	}
 	res.render('grant-builder', { siteBase: SITE_BASE });
@@ -155,10 +157,12 @@ router.post('/grant-builder', async (req, res) => {
 	} catch (error) {
 		console.error('Grant builder: lead notification failed', error);
 	}
-	try {
-		await sendBuilderConfirmation(name, email);
-	} catch (error) {
-		console.error('Grant builder: confirmation email failed', error);
+	if (SEND_CONFIRMATION) {
+		try {
+			await sendBuilderConfirmation(name, email);
+		} catch (error) {
+			console.error('Grant builder: confirmation email failed', error);
+		}
 	}
 
 	setUnlockCookie(req, res);
@@ -174,7 +178,14 @@ router.post('/grant-builder', async (req, res) => {
 // is ironfeast.tv — which is why the sender here is a .tv address even though the site
 // is ironfeast.org. Override via env once ironfeast.org is verified with Mailgun.
 const MAIL_FROM = process.env.BUILDER_MAIL_FROM || 'contactus@ironfeast.tv';
-const LEAD_NOTIFY_TO = process.env.CONTACT_US_EMAIL || 'ana@ironfeast.tv';
+const LEAD_NOTIFY_TO = process.env.BUILDER_LEAD_TO || process.env.CONTACT_US_EMAIL || 'ana@ironfeast.tv';
+
+// The Mailgun domain in use is a sandbox, which only delivers to a short list of
+// authorized recipients. Ana is on that list; a visitor who just typed their address
+// into the gate never is, so their confirmation would be rejected every time.
+// Confirmations stay OFF until a real domain is verified with Mailgun, at which point
+// setting BUILDER_SEND_CONFIRMATION=true turns them on with no code change.
+const SEND_CONFIRMATION = String(process.env.BUILDER_SEND_CONFIRMATION || '').toLowerCase() === 'true';
 
 async function sendPluginEmail(template, payload) {
 	if (!process.env.NETLIFY_EMAILS_SECRET || !process.env.URL) {
