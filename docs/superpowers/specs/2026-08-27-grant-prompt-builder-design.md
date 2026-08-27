@@ -33,10 +33,10 @@ Verified pre-conditions:
 | Audience | Public lead magnet, email-gated |
 | Gate timing | Before the form loads |
 | Lead delivery | Notify Ana **and** send the visitor a templated confirmation |
-| Design fit | Site header/footer wrapper; builder interior untouched |
+| Design fit | Site header/footer **copied** into the new pages; builder interior untouched |
 | Modes | Keep both; default to **For-Profit** |
 | Canonical domain | `ironfeast.org` |
-| Confirmation sender | `contactus@ironfeast.org` |
+| Confirmation sender | `ana@ironfeast.org` |
 | URL | `/grant-builder`, subdomain-ready |
 
 ## Architecture
@@ -124,7 +124,7 @@ same express app. Recipient `ana@ironfeast.org`, matching the existing contact f
 **To the visitor** — the Netlify Emails plugin, via a new template at
 `emails/grant-builder/index.html`. `[functions.emails] included_files = ["./emails/**"]`
 is already configured, so the template is picked up automatically. Sender:
-`contactus@ironfeast.org`.
+`ana@ironfeast.org`.
 
 The `CONTACT_FORM_HASH` guard does not transfer — it exists because `/send-email` is
 publicly callable, and on a gate form it would be ceremony. Its absence leaves the
@@ -144,10 +144,11 @@ stops naive bots from flooding Ana.
 
 ### Site chrome
 
-`schedule.html` already duplicates the header (its own `.navbar` / `.logo` CSS at lines
-43–49, copied `<header>` at line 349), so a third copy is the wrong direction. Extract
-`public/partials/header.ejs` and `public/partials/footer.ejs` plus the ~40 lines of chrome
-CSS, and use them from both `index.ejs` and `grant-builder.ejs`.
+The chrome is **copied** into each new page rather than extracted into shared partials.
+`schedule.html` already duplicates it (its own `.navbar` / `.logo` CSS at lines 43–49,
+copied `<header>` at line 349), so this makes a third copy — accepted deliberately in
+exchange for not editing the live 527-line `index.ejs` beyond a single nav link. Extracting
+`public/partials/` remains the right cleanup once this has shipped and settled.
 
 `schedule.html` is left as-is: it is a static file served by a `force` redirect and never
 passes through EJS. Converting it is out of scope.
@@ -162,13 +163,12 @@ clobbered.
 **New**
 - `public/grant-builder.ejs` — the tool, wrapped in site chrome
 - `public/grant-builder-gate.ejs` — the email gate
-- `public/partials/header.ejs`, `public/partials/footer.ejs`
 - `emails/grant-builder/index.html` — visitor confirmation template
 
 **Modified**
 - `netlify/functions/website/index.js` — host detection, three routes, cookie handling,
   lead notification
-- `public/index.ejs` — use the chrome partials; add a "Grant Builder" nav item; canonical tag
+- `public/index.ejs` — **one line only**: a "Grant Builder" nav item
 
 **Unchanged**
 - `netlify.toml` — the existing `/*` fallback already covers the new routes
@@ -210,9 +210,22 @@ clobbered.
 
 ## Open risks
 
-1. `contactus@ironfeast.org` must be verified as a sender or confirmations will bounce.
+1. `ana@ironfeast.org` must be verified as a sender with the Emails provider, or every
+   confirmation bounces. This is an account-side task.
 2. A client-side "copy" is still reachable to anyone who unlocks once; the gate is a
    lead-capture device, not access control. Accepted.
-3. Editing the live 527-line `index.ejs` for the chrome refactor carries non-zero risk to
-   a working homepage. Mitigated by keeping the change mechanical and verifying the
-   homepage renders unchanged.
+3. ~~Editing the live `index.ejs` for the chrome refactor~~ — **resolved**: the chrome is
+   copied instead, so the only homepage change is one added nav `<li>`. Reverting that
+   single line fully removes the feature from the site.
+
+## Implementation notes
+
+Discovered while building, worth keeping:
+
+- **`serverless-http` always reports `req.protocol === 'https'`**, even on `localhost` with
+  no `x-forwarded-proto` header. Gating the cookie's `Secure` attribute on `req.protocol`
+  therefore sets it unconditionally, and a `Secure` cookie over plain http is dropped by
+  the browser — which would have made the gate impossible to unlock under `netlify dev`.
+  `setUnlockCookie` keys off the hostname instead.
+- The honeypot unlocks **silently** rather than showing an error, so a bot cannot learn
+  which field trapped it.

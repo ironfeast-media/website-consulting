@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grant Opportunity Prompt Builder v3.0</title>
+<meta name="description" content="Build a research-grade AI prompt for finding grant opportunities — nonprofit or for-profit. A free tool from Ironfeast Consulting.">
+<link rel="canonical" href="<%= siteBase %>/grant-builder">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600;700&display=swap">
+<style>
+
+  :root {
+    --bg: #f4f6fa;
+    --surface: #ffffff;
+    --surfaceB: #f0f3f9;
+    --border: #dce2ee;
+    --borderB: #c8d0e4;
+    --blue: #2563eb;
+    --blueDim: #dbeafe;
+    --blueGlow: rgba(37,99,235,0.15);
+    --green: #15803d;
+    --greenDim: #dcfce7;
+    --gold: #92620a;
+    --goldDim: #fef3c7;
+    --red: #dc2626;
+    --amber: #b45309;
+    --text: #1e2a3a;
+    --muted: #52647a;
+    --faint: #a0afc0;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+    --serif: 'Lora', Georgia, serif;
+    /* mode accent — overridden by JS */
+    --accent: #2563eb;
+    --accentDim: #dbeafe;
+    --accentGlow: rgba(37,99,235,0.15);
+    --headerA: #1e3a8a;
+    --headerB: #2563eb;
+    --headerC: #3b82f6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--serif); min-height: 100vh; padding-bottom: 60px; }
+
+  /* ── header ── */
+  .header { background: linear-gradient(135deg, var(--headerA) 0%, var(--headerB) 60%, var(--headerC) 100%); border-bottom: 1px solid rgba(0,0,0,.15); padding: 32px 32px 26px; transition: background .4s; }
+  .header-inner { max-width: 860px; margin: 0 auto; }
+  .eyebrow { font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,.7); letter-spacing: .18em; text-transform: uppercase; margin-bottom: 8px; }
+  .header h1 { font-size: 28px; font-weight: 700; line-height: 1.2; margin-bottom: 8px; color: #fff; }
+  .header h1 span { color: rgba(255,255,255,.65); font-weight: 400; }
+  .header p { color: rgba(255,255,255,.82); font-size: 14px; line-height: 1.65; max-width: 580px; }
+  .hbadges { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .hbadge { font-family: var(--mono); font-size: 10px; border-radius: 12px; padding: 3px 10px; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.38); color: #fff; }
+
+  /* ── org type toggle ── */
+  .mode-toggle-wrap { max-width: 860px; margin: 0 auto; padding: 20px 24px 0; }
+  .mode-toggle { display: inline-flex; background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 4px; box-shadow: 0 1px 4px rgba(0,0,0,.07); gap: 4px; }
+  .mode-btn { font-family: var(--mono); font-size: 13px; font-weight: 700; padding: 10px 24px; border: none; border-radius: 9px; cursor: pointer; transition: all .2s; letter-spacing: .02em; background: transparent; color: var(--muted); }
+  .mode-btn.active-np  { background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #fff; box-shadow: 0 2px 10px rgba(37,99,235,.25); }
+  .mode-btn.active-fp  { background: linear-gradient(135deg, #064e3b, #059669); color: #fff; box-shadow: 0 2px 10px rgba(5,150,105,.25); }
+  .mode-label { font-family: var(--serif); font-size: 13px; color: var(--muted); margin-left: 14px; align-self: center; font-style: italic; }
+
+  /* ── layout ── */
+  .main { max-width: 860px; margin: 0 auto; padding: 18px 24px 0; }
+
+  /* ── tabs ── */
+  .tabs { display: flex; gap: 4px; margin-bottom: 22px; background: #fff; border-radius: 12px; padding: 4px; border: 1px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .tab-btn { flex: 1; background: transparent; border: none; border-radius: 8px; color: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 600; padding: 10px 14px; cursor: pointer; transition: all .18s; }
+  .tab-btn:hover { background: var(--surfaceB); color: var(--text); }
+  .tab-btn.active { background: var(--accent); color: #fff; box-shadow: 0 2px 8px var(--accentGlow); }
+
+  /* ── sections ── */
+  .section { margin-bottom: 18px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+  .section-head { background: linear-gradient(90deg, var(--accentDim) 0%, #f8faff 100%); padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .section-title { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--accent); flex: 1; letter-spacing: .03em; }
+  .section-badge { font-family: var(--mono); font-size: 10px; background: var(--goldDim); color: var(--gold); border-radius: 10px; padding: 2px 8px; font-weight: 700; }
+  .section-body { padding: 18px 20px; background: var(--surface); }
+
+  /* ── grid ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media(max-width: 620px) { .grid-2,.grid-3 { grid-template-columns: 1fr; } }
+
+  /* ── fields ── */
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 4px; font-weight: 700; }
+  .field .hint { font-size: 11px; color: var(--muted); margin-bottom: 5px; font-style: italic; }
+  input[type=text], select, textarea {
+    width: 100%; background: var(--surfaceB); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-family: var(--serif); font-size: 14px;
+    padding: 9px 13px; outline: none; transition: border-color .2s, box-shadow .2s; -webkit-appearance: none;
+  }
+  input[type=text]:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accentGlow); background: #fff; }
+  textarea { resize: vertical; line-height: 1.6; }
+  select { cursor: pointer; }
+
+  /* ── pills ── */
+  .pills { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px; }
+  .pill { background: var(--surfaceB); border: 1px solid var(--border); border-radius: 20px; color: var(--muted); font-family: var(--mono); font-size: 11px; padding: 5px 13px; cursor: pointer; transition: all .15s; user-select: none; }
+  .pill:hover { border-color: var(--accent); color: var(--accent); background: var(--accentDim); }
+  .pill.active-blue  { background: #dbeafe; border-color: #93c5fd; color: #1d4ed8; font-weight: 700; }
+  .pill.active-green { background: #d1fae5; border-color: #6ee7b7; color: #065f46; font-weight: 700; }
+  .pill.active-amber { background: #fef9c3; border-color: #fde68a; color: #92400e; font-weight: 700; }
+  .pill.active-teal  { background: #ccfbf1; border-color: #5eead4; color: #0f766e; font-weight: 700; }
+
+  /* ── tag input ── */
+  .tag-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .tag-add-btn { background: var(--accentDim); border: 1px solid var(--accent); border-radius: 8px; color: var(--accent); padding: 9px 14px; cursor: pointer; font-family: var(--mono); font-size: 12px; font-weight: 700; white-space: nowrap; transition: opacity .15s; }
+  .tag-add-btn:hover { opacity: .8; }
+  .tags-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag-chip { background: var(--accentDim); border: 1px solid var(--accent); opacity: .7; color: var(--accent); border-radius: 20px; padding: 3px 10px 3px 12px; font-size: 12px; font-family: var(--mono); display: inline-flex; align-items: center; gap: 6px; }
+  .tag-x { cursor: pointer; color: var(--faint); font-weight: 700; font-size: 14px; }
+  .tag-x:hover { color: var(--red); }
+
+  /* ── checkbox ── */
+  .check-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+  .check-row input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+  .check-row label { font-family: var(--mono); font-size: 12px; color: var(--muted); cursor: pointer; }
+
+  /* ── action buttons ── */
+  .btn-row { display: flex; gap: 12px; margin-top: 8px; padding-bottom: 20px; }
+  .btn-primary { flex: 1; background: linear-gradient(135deg, var(--headerA) 0%, var(--accent) 100%); border: none; border-radius: 10px; color: #fff; font-family: var(--mono); font-size: 14px; font-weight: 700; padding: 15px 24px; cursor: pointer; letter-spacing: .04em; box-shadow: 0 4px 14px var(--accentGlow); transition: all .15s; }
+  .btn-primary:hover { opacity: .9; }
+  .btn-reset { background: #fff; border: 1px solid var(--border); border-radius: 10px; color: var(--muted); font-family: var(--mono); font-size: 13px; padding: 15px 18px; cursor: pointer; transition: all .15s; }
+  .btn-reset:hover { color: var(--text); border-color: var(--borderB); }
+
+  /* ── prompt output ── */
+  .layer-badges { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .lbadge { font-family: var(--mono); font-size: 10px; border-radius: 10px; padding: 3px 10px; }
+  .prompt-box { background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 16px; box-shadow: 0 1px 6px rgba(0,0,0,.06); }
+  .prompt-topbar { padding: 11px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, var(--accentDim) 0%, #f8faff 100%); }
+  .prompt-label { font-family: var(--mono); font-size: 11px; color: var(--accent); font-weight: 700; letter-spacing: .08em; }
+  .btn-copy { border-radius: 7px; font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 5px 14px; cursor: pointer; transition: all .2s; }
+  .btn-copy.idle { background: var(--accentDim); border: 1px solid var(--accent); color: var(--accent); }
+  .btn-copy.done { background: #d1fae5; border: 1px solid #6ee7b7; color: #065f46; }
+  pre.prompt-pre { margin: 0; padding: 22px; font-family: var(--mono); font-size: 11.5px; line-height: 1.8; color: #1e3a5f; white-space: pre-wrap; word-break: break-word; max-height: 500px; overflow-y: auto; background: #f8faff; }
+  .copy-row { display: flex; gap: 10px; }
+  .btn-back { background: #fff; border: 1px solid var(--border); border-radius: 9px; color: var(--muted); font-family: var(--mono); font-size: 12px; padding: 11px 18px; cursor: pointer; }
+  .btn-copy-big { flex: 1; border-radius: 9px; font-family: var(--mono); font-size: 13px; font-weight: 700; padding: 11px 20px; cursor: pointer; transition: all .2s; }
+  .btn-copy-big.idle { background: linear-gradient(135deg, var(--headerA), var(--accent)); border: 1px solid transparent; color: #fff; }
+  .btn-copy-big.done { background: #d1fae5; border: 1px solid #6ee7b7; color: #065f46; }
+
+  /* ── empty state ── */
+  .empty { text-align: center; padding: 60px 40px; border: 2px dashed var(--border); border-radius: 12px; color: var(--muted); background: #fff; }
+  .empty .emoji { font-size: 40px; margin-bottom: 12px; }
+  .empty p { font-family: var(--mono); font-size: 13px; }
+
+  /* ── guide ── */
+  .guide-card { margin-bottom: 14px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+  .guide-head { padding: 10px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .guide-body { padding: 14px 18px; background: var(--surface); font-size: 13px; color: var(--muted); line-height: 1.75; }
+  .tips-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 16px 20px; margin-top: 8px; }
+  .tips-label { font-family: var(--mono); font-size: 11px; color: var(--gold); margin-bottom: 10px; font-weight: 700; }
+  .tip-row { display: flex; gap: 10px; margin-bottom: 8px; font-size: 13px; color: #4a3b1a; line-height: 1.6; }
+  .tip-num { color: var(--accent); font-family: var(--mono); font-size: 12px; min-width: 20px; font-weight: 700; }
+
+  /* ── FP-only / NP-only visibility ── */
+  .fp-only { display: none; }
+  .np-only { display: block; }
+  body.fp-mode .fp-only { display: block; }
+  body.fp-mode .np-only { display: none; }
+  .grid-fp-only { display: none; }
+  body.fp-mode .grid-fp-only { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--surfaceB); }
+  ::-webkit-scrollbar-thumb { background: var(--borderB); border-radius: 3px; }
+
+  /* ─────────────────────────────────────────────────────────────
+     IRONFEAST SITE CHROME
+     Copied from public/index.ejs rather than shared, deliberately:
+     keeps this page from depending on the homepage stylesheet.
+     Every selector is namespaced .site-* so nothing here can
+     collide with the builder's own .header / .footer rules above.
+     Colors are literal because the builder's :root does not
+     define the homepage's custom properties.
+     ───────────────────────────────────────────────────────────── */
+  .site-header {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    padding: 1rem 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .site-nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .site-logo {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #ecf0f1;
+    text-decoration: none;
+    line-height: 1.2;
+  }
+  .site-nav-links {
+    display: flex;
+    gap: 25px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+  }
+  .site-nav-links a {
+    text-decoration: none;
+    color: #ecf0f1;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+  .site-nav-links a:hover,
+  .site-nav-links a:focus-visible {
+    color: #3498db;
+  }
+  .site-nav-links a[aria-current="page"] {
+    color: #3498db;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 2px;
+  }
+
+  .site-cta {
+    max-width: 860px;
+    margin: 48px auto 0;
+    padding: 30px 26px;
+    text-align: center;
+    background: var(--surface, #ffffff);
+    border: 1px solid var(--border, #dce2ee);
+    border-radius: 12px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .site-cta h2 {
+    font-size: 1.35rem;
+    color: #1e2a3a;
+    margin: 0 0 8px;
+  }
+  .site-cta p {
+    color: #52647a;
+    margin: 0 0 20px;
+    line-height: 1.6;
+  }
+  .site-cta-btn {
+    display: inline-block;
+    background-color: #e74c3c;
+    color: #fff;
+    padding: 12px 28px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+  }
+  .site-cta-btn:hover,
+  .site-cta-btn:focus-visible {
+    background-color: #c0392b;
+  }
+
+  .site-footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    margin-top: 40px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .site-footer p { margin: 0; }
+
+  @media (max-width: 600px) {
+    .site-nav-inner { justify-content: center; text-align: center; }
+    .site-nav-links { gap: 16px; justify-content: center; }
+    .site-logo { font-size: 1.45rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── IRONFEAST SITE CHROME ── -->
+<header class="site-header">
+  <div class="site-nav-inner">
+    <a href="<%= siteBase %>/" class="site-logo">Ironfeast Consulting</a>
+    <nav aria-label="Main">
+      <ul class="site-nav-links">
+        <li><a href="<%= siteBase %>/#overview">Overview</a></li>
+        <li><a href="<%= siteBase %>/#about">About Us</a></li>
+        <li><a href="<%= siteBase %>/#sbir">SBIR Info</a></li>
+        <li><a href="<%= siteBase %>/grant-builder" aria-current="page">Grant Builder</a></li>
+        <li><a href="<%= siteBase %>/#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<!-- ── HEADER ── -->
+<div class="header">
+  <div class="header-inner">
+    <div class="eyebrow" id="hdr-eyebrow">🔍 Grant Intelligence · v3.0</div>
+    <h1>Grant Opportunity <span>Prompt Builder</span></h1>
+    <p id="hdr-desc">Fill in your organization's details. Get a research-grade AI prompt with role framing, chain-of-thought reasoning, and built-in hallucination controls — ready to paste into any AI.</p>
+    <div class="hbadges">
+      <span class="hbadge">🎭 Role Framing</span>
+      <span class="hbadge">🧠 Chain-of-Thought</span>
+      <span class="hbadge">✅ Verification Step</span>
+      <span class="hbadge">🆕 2026 Categories</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── ORG TYPE TOGGLE ── -->
+<div class="mode-toggle-wrap">
+  <div style="display:flex;align-items:center;gap:0;flex-wrap:wrap;row-gap:10px;">
+    <div class="mode-toggle">
+      <button class="mode-btn active-np" id="btn-np" onclick="setMode('np')">🏛️ Nonprofit</button>
+      <button class="mode-btn" id="btn-fp" onclick="setMode('fp')">🏢 For-Profit</button>
+    </div>
+    <span class="mode-label" id="mode-label">Foundations, government, corporate grants &amp; giving programs</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('build',this)">📝 Build Prompt</button>
+    <button class="tab-btn" onclick="showTab('prompt',this)">✨ Generated Prompt</button>
+    <button class="tab-btn" onclick="showTab('guide',this)">💡 How to Use</button>
+  </div>
+
+  <!-- ══ BUILD TAB ══ -->
+  <div id="tab-build">
+
+    <!-- ── ORGANIZATION BASICS ── -->
+    <div class="section">
+      <div class="section-head"><span>🏢</span><span class="section-title" id="sec-basics-title">Organization Basics</span></div>
+      <div class="section-body">
+        <div class="grid-2">
+          <div class="field">
+            <label>Organization Name</label>
+            <div class="hint">Optional — personalizes the prompt</div>
+            <input type="text" id="orgName" placeholder="e.g. Riverside Youth Alliance">
+          </div>
+          <!-- NP: tax status | FP: business structure -->
+          <div class="field np-only">
+            <label>Tax-Exempt Status</label>
+            <select id="taxStatus">
+              <option value="501(c)(3)">501(c)(3) — Public Charity</option>
+              <option value="501(c)(3) Private Foundation">501(c)(3) — Private Foundation</option>
+              <option value="501(c)(4)">501(c)(4) — Social Welfare</option>
+              <option value="Fiscally Sponsored">Fiscally Sponsored</option>
+              <option value="In process / Pending">In process / Pending</option>
+            </select>
+          </div>
+          <div class="field fp-only">
+            <label>Business Structure</label>
+            <select id="bizStructure">
+              <option value="LLC">LLC</option>
+              <option value="C-Corporation">C-Corporation</option>
+              <option value="S-Corporation">S-Corporation</option>
+              <option value="B-Corporation (Benefit Corp)">B-Corporation (Benefit Corp)</option>
+              <option value="Sole Proprietorship">Sole Proprietorship</option>
+              <option value="Partnership">Partnership</option>
+              <option value="Cooperative">Cooperative</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- NP: mission | FP: business description -->
+        <div class="field np-only">
+          <label>Mission Statement</label>
+          <div class="hint">1–2 sentences using funder language, not internal jargon</div>
+          <textarea id="mission" rows="2" placeholder="e.g. We provide after-school STEM and mentorship to underserved youth in urban communities."></textarea>
+        </div>
+        <div class="field fp-only">
+          <label>Business Description &amp; Value Proposition</label>
+          <div class="hint">What you do, what problem you solve, and what makes your approach distinctive</div>
+          <textarea id="bizDesc" rows="2" placeholder="e.g. We develop AI-powered diagnostic tools for rural primary care clinics, reducing misdiagnosis rates by 40%."></textarea>
+        </div>
+
+        <div class="grid-3">
+          <div class="field">
+            <label>Years Operating</label>
+            <input type="text" id="orgAge" placeholder="e.g. 3">
+          </div>
+          <div class="field">
+            <label id="lbl-phase">Organizational Phase</label>
+            <select id="orgPhase">
+              <option value="pre-revenue startup">Pre-Revenue Startup</option>
+              <option value="early-stage with some revenue">Early-Stage (some revenue)</option>
+              <option value="growth stage" selected>Growth Stage</option>
+              <option value="mature / established">Mature / Established</option>
+            </select>
+          </div>
+          <div class="field">
+            <label id="lbl-budget">Annual Revenue / Budget (USD)</label>
+            <input type="text" id="budget" placeholder="e.g. 500,000">
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Staff / Team Size</label>
+            <select id="staffSize">
+              <option value="">Select…</option>
+              <option value="1 (founder only)">Just me / Founder</option>
+              <option value="2–5">2–5</option>
+              <option value="6–15">6–15</option>
+              <option value="16–50">16–50</option>
+              <option value="50+">50+</option>
+            </select>
+          </div>
+          <!-- NP only: fiscal sponsor -->
+          <div class="field np-only">
+            <label>Fiscal Sponsor Status</label>
+            <select id="fiscalSponsor">
+              <option value="no">Not fiscally sponsored</option>
+              <option value="yes">Yes — fiscally sponsored</option>
+              <option value="transitioning">In transition</option>
+            </select>
+          </div>
+          <!-- FP only: ownership -->
+          <div class="field fp-only">
+            <label>Ownership / Founder Background</label>
+            <select id="ownership">
+              <option value="">Select…</option>
+              <option value="Women-owned (WOSB)">Women-owned (WOSB)</option>
+              <option value="Minority-owned (MBE)">Minority-owned (MBE)</option>
+              <option value="Veteran-owned (VOSB/SDVOSB)">Veteran-owned (VOSB / SDVOSB)</option>
+              <option value="HUBZone certified">HUBZone certified</option>
+              <option value="Small business (SBA size standards)">Small business (SBA standards)</option>
+              <option value="No special designations">No special designations</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- FP only: NAICS / industry -->
+        <div class="grid-fp-only">
+          <div class="field fp-only">
+            <label>Industry / NAICS Code</label>
+            <div class="hint">Affects SBIR, SBA, and state economic development eligibility</div>
+            <input type="text" id="naics" placeholder="e.g. 541715 – R&D in Physical Sciences">
+          </div>
+          <div class="field fp-only">
+            <label>Technology Readiness Level (TRL)</label>
+            <div class="hint">Critical for SBIR/STTR eligibility</div>
+            <select id="trl">
+              <option value="">Select if applicable…</option>
+              <option value="TRL 1–3 (Basic research / concept)">TRL 1–3 — Basic research / concept</option>
+              <option value="TRL 4–5 (Proof of concept / lab validation)">TRL 4–5 — Proof of concept</option>
+              <option value="TRL 6–7 (Prototype / demo)">TRL 6–7 — Prototype / demo</option>
+              <option value="TRL 8–9 (System complete / commercial)">TRL 8–9 — Near or at commercial</option>
+              <option value="Not applicable">Not applicable</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── GEOGRAPHY ── -->
+    <div class="section">
+      <div class="section-head"><span>📍</span><span class="section-title">Geography</span></div>
+      <div class="section-body">
+        <div class="grid-2">
+          <div class="field">
+            <label id="lbl-geo">Primary Location / Service Area</label>
+            <div class="hint">City, county, metro area, or state(s)</div>
+            <input type="text" id="geography" placeholder="e.g. Austin, TX">
+          </div>
+          <div class="field">
+            <label>Geographic Scope of Funding Needed</label>
+            <select id="geoScope">
+              <option value="local">Local / City</option>
+              <option value="county">County-wide</option>
+              <option value="state">Statewide</option>
+              <option value="regional">Multi-State / Regional</option>
+              <option value="national">National</option>
+              <option value="international">International</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FOCUS AREA / MARKET ── -->
+    <div class="section">
+      <div class="section-head"><span id="focus-icon">🎯</span><span class="section-title" id="sec-focus-title">Who You Serve &amp; What You Do</span></div>
+      <div class="section-body">
+
+        <!-- NP: target population -->
+        <div class="field np-only">
+          <label>Target Population</label>
+          <div class="hint">Be specific — age, race/ethnicity, economic status, disability, location</div>
+          <input type="text" id="population" placeholder="e.g. Low-income Black and Latino youth ages 10–18 in South Side Chicago">
+        </div>
+
+        <!-- FP: target market + industry -->
+        <div class="field fp-only">
+          <label>Target Market &amp; Customer</label>
+          <div class="hint">Who buys from you / benefits from your product or service</div>
+          <input type="text" id="targetMarket" placeholder="e.g. Rural primary care clinics in underserved communities, 5–50 physicians">
+        </div>
+
+        <div class="field">
+          <label id="lbl-issues">Focus / Issue Areas</label>
+          <div class="hint np-only">Use Candid PCS / NTEE language for best results</div>
+          <div class="hint fp-only">Industry verticals, technology domains, or social impact areas</div>
+          <div class="tag-row"><input type="text" id="issueAreasInp" placeholder="Press Enter to add"><button class="tag-add-btn" onclick="addTag('issueAreas')">+ Add</button></div>
+          <div class="tags-list" id="issueAreas-tags"></div><input type="hidden" id="issueAreas" value="">
+        </div>
+
+        <div class="field">
+          <label id="lbl-keywords">Keywords</label>
+          <div class="hint np-only">Program or service keywords for database searches</div>
+          <div class="hint fp-only">Product, technology, or solution keywords</div>
+          <div class="tag-row"><input type="text" id="keywordsInp" placeholder="Press Enter to add"><button class="tag-add-btn" onclick="addTag('keywords')">+ Add</button></div>
+          <div class="tags-list" id="keywords-tags"></div><input type="hidden" id="keywords" value="">
+        </div>
+
+        <!-- Emerging categories — NP vs FP options -->
+        <div class="field">
+          <label>Emerging &amp; Priority Categories (2024–2026)</label>
+          <div class="hint">Check all that apply to your work or funding interests</div>
+
+          <!-- NP pills -->
+          <div class="pills np-only" id="np-emerging">
+            <span class="pill" data-group="emerging" data-val="AI / Technology for nonprofits" onclick="togglePill(this,'amber')">AI / Technology</span>
+            <span class="pill" data-group="emerging" data-val="Climate Justice / Environmental Equity" onclick="togglePill(this,'amber')">Climate Justice</span>
+            <span class="pill" data-group="emerging" data-val="Trust-Based Philanthropy" onclick="togglePill(this,'amber')">Trust-Based Philanthropy</span>
+            <span class="pill" data-group="emerging" data-val="Equity &amp; Belonging" onclick="togglePill(this,'amber')">Equity &amp; Belonging</span>
+            <span class="pill" data-group="emerging" data-val="Mental Health &amp; Wellness" onclick="togglePill(this,'amber')">Mental Health &amp; Wellness</span>
+            <span class="pill" data-group="emerging" data-val="Participatory Grantmaking" onclick="togglePill(this,'amber')">Participatory Grantmaking</span>
+            <span class="pill" data-group="emerging" data-val="Digital Equity" onclick="togglePill(this,'amber')">Digital Equity</span>
+            <span class="pill" data-group="emerging" data-val="Democracy &amp; Civic Engagement" onclick="togglePill(this,'amber')">Democracy &amp; Civic</span>
+          </div>
+
+          <!-- FP pills -->
+          <div class="pills fp-only" id="fp-emerging">
+            <span class="pill" data-group="fp-emerging" data-val="Clean Energy / Climate Tech" onclick="togglePill(this,'teal')">Clean Energy / Climate Tech</span>
+            <span class="pill" data-group="fp-emerging" data-val="AI / Machine Learning" onclick="togglePill(this,'teal')">AI / Machine Learning</span>
+            <span class="pill" data-group="fp-emerging" data-val="Health Tech / MedTech / BioTech" onclick="togglePill(this,'teal')">Health Tech / BioTech</span>
+            <span class="pill" data-group="fp-emerging" data-val="Advanced Manufacturing" onclick="togglePill(this,'teal')">Advanced Manufacturing</span>
+            <span class="pill" data-group="fp-emerging" data-val="AgTech / Food Systems" onclick="togglePill(this,'teal')">AgTech / Food Systems</span>
+            <span class="pill" data-group="fp-emerging" data-val="Workforce Development / EdTech" onclick="togglePill(this,'teal')">Workforce / EdTech</span>
+            <span class="pill" data-group="fp-emerging" data-val="Defense / Dual-Use Technology" onclick="togglePill(this,'teal')">Defense / Dual-Use</span>
+            <span class="pill" data-group="fp-emerging" data-val="Social Impact / Impact Investing" onclick="togglePill(this,'teal')">Social Impact</span>
+            <span class="pill" data-group="fp-emerging" data-val="Cybersecurity" onclick="togglePill(this,'teal')">Cybersecurity</span>
+            <span class="pill" data-group="fp-emerging" data-val="Space / Aerospace" onclick="togglePill(this,'teal')">Space / Aerospace</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── GRANT SEARCH FILTERS ── -->
+    <div class="section">
+      <div class="section-head"><span>🔎</span><span class="section-title">Grant Search Filters</span></div>
+      <div class="section-body">
+        <div class="grid-3">
+          <div class="field"><label>Min Grant Amount ($)</label><input type="text" id="grantMin" placeholder="e.g. 25,000"></div>
+          <div class="field"><label>Max Grant Amount ($)</label><input type="text" id="grantMax" placeholder="e.g. 500,000"></div>
+          <div class="field"><label>Min Days Until Deadline</label>
+            <select id="daysOut">
+              <option value="14">14 days</option>
+              <option value="30">30 days</option>
+              <option value="45" selected>45 days</option>
+              <option value="60">60 days</option>
+              <option value="90">90 days</option>
+              <option value="rolling">Rolling / Open</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- NP funder types -->
+        <div class="field np-only">
+          <label>Preferred Funder Types</label>
+          <div class="pills">
+            <span class="pill" data-group="funderTypes" data-val="Private Foundation" onclick="togglePill(this,'blue')">Private Foundation</span>
+            <span class="pill" data-group="funderTypes" data-val="Family Foundation" onclick="togglePill(this,'blue')">Family Foundation</span>
+            <span class="pill" data-group="funderTypes" data-val="Community Foundation" onclick="togglePill(this,'blue')">Community Foundation</span>
+            <span class="pill" data-group="funderTypes" data-val="Federal Government" onclick="togglePill(this,'blue')">Federal Govt</span>
+            <span class="pill" data-group="funderTypes" data-val="State / Local Government" onclick="togglePill(this,'blue')">State/Local Govt</span>
+            <span class="pill" data-group="funderTypes" data-val="Corporate CSR / Giving Program" onclick="togglePill(this,'blue')">Corporate/CSR</span>
+            <span class="pill" data-group="funderTypes" data-val="Donor-Advised Fund" onclick="togglePill(this,'blue')">Donor-Advised Fund</span>
+            <span class="pill" data-group="funderTypes" data-val="Giving Circle / Club" onclick="togglePill(this,'blue')">Giving Circle/Club</span>
+          </div>
+        </div>
+
+        <!-- FP funder types -->
+        <div class="field fp-only">
+          <label>Preferred Funding Sources</label>
+          <div class="pills">
+            <span class="pill" data-group="fp-funderTypes" data-val="SBIR (Small Business Innovation Research)" onclick="togglePill(this,'green')">SBIR</span>
+            <span class="pill" data-group="fp-funderTypes" data-val="STTR (Small Business Technology Transfer)" onclick="togglePill(this,'green')">STTR</span>
+            <span class="pill" data-group="fp-funderTypes" data-val="SBA Loans &amp; Grant Programs" onclick="togglePill(this,'green')">SBA Programs</span>
+            <span class="pill" data-group="fp-funderTypes" data-val="State Economic Development Agency" onclick="togglePill(this,'green')">State Econ Dev</span>
+            <span class="pill" data-group="fp-funderTypes" data-val="Federal R&amp;D Agencies (NIH, DOE, DARPA, NASA, NSF)" onclick="togglePill(this,'green')">Federal R&amp;D</span>
+            <span class="pill" data-group="fp-funderTypes" data-val="Corporate Innovation / Startup Program" onclick="togglePill(this,'green')">Corporate Innovation</span>
+            <span class="pill" data-group="fp-funderTypes" data-val="Accelerator / Incubator (non-dilutive stipend)" onclick="togglePill(this,'green')">Accelerator</span>
+            <span class="pill" data-group="fp-funderTypes" data-val="Private Foundation (impact / program-related investing)" onclick="togglePill(this,'green')">Foundation PRI</span>
+            <span class="pill" data-group="fp-funderTypes" data-val="European / International Innovation Grants (Horizon, Innovate UK)" onclick="togglePill(this,'green')">Intl Grants</span>
+          </div>
+        </div>
+
+        <!-- NP support types -->
+        <div class="field np-only">
+          <label>Support Type Needed</label>
+          <div class="pills">
+            <span class="pill" data-group="supportTypes" data-val="General Operating Support" onclick="togglePill(this,'green')">General Operating</span>
+            <span class="pill" data-group="supportTypes" data-val="Project / Program" onclick="togglePill(this,'green')">Project/Program</span>
+            <span class="pill" data-group="supportTypes" data-val="Capacity Building" onclick="togglePill(this,'green')">Capacity Building</span>
+            <span class="pill" data-group="supportTypes" data-val="Capital / Facilities" onclick="togglePill(this,'green')">Capital/Facilities</span>
+            <span class="pill" data-group="supportTypes" data-val="Research" onclick="togglePill(this,'green')">Research</span>
+            <span class="pill" data-group="supportTypes" data-val="Scholarships / Direct Aid" onclick="togglePill(this,'green')">Scholarships</span>
+          </div>
+        </div>
+
+        <!-- FP support types -->
+        <div class="field fp-only">
+          <label>Use of Funds</label>
+          <div class="pills">
+            <span class="pill" data-group="fp-supportTypes" data-val="R&amp;D / Product Development" onclick="togglePill(this,'blue')">R&amp;D / Product Dev</span>
+            <span class="pill" data-group="fp-supportTypes" data-val="Proof-of-Concept / Prototype" onclick="togglePill(this,'blue')">Proof of Concept</span>
+            <span class="pill" data-group="fp-supportTypes" data-val="Market Validation / Commercialization" onclick="togglePill(this,'blue')">Commercialization</span>
+            <span class="pill" data-group="fp-supportTypes" data-val="Hiring / Workforce Expansion" onclick="togglePill(this,'blue')">Hiring</span>
+            <span class="pill" data-group="fp-supportTypes" data-val="Export / Market Expansion" onclick="togglePill(this,'blue')">Export / Expansion</span>
+            <span class="pill" data-group="fp-supportTypes" data-val="Equipment / Capital" onclick="togglePill(this,'blue')">Equipment / Capital</span>
+            <span class="pill" data-group="fp-supportTypes" data-val="Training / Workforce Development" onclick="togglePill(this,'blue')">Training</span>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Multi-Year Preference</label>
+            <select id="multiYear">
+              <option value="either">Either OK</option>
+              <option value="prefer multi-year">Prefer multi-year</option>
+              <option value="require multi-year">Require multi-year</option>
+              <option value="single year only">Single year only</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Application Burden Tolerance</label>
+            <select id="appBurden">
+              <option value="low (LOI or short form)">Low — LOI or short form</option>
+              <option value="medium (up to 10-page proposal)" selected>Medium — up to 10 pages</option>
+              <option value="high (full federal application)">High — full federal OK</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FINANCIAL CRITERIA ── -->
+    <div class="section">
+      <div class="section-head"><span>⚙️</span><span class="section-title" id="sec-fin-title">Financial &amp; Operational Criteria</span><span class="section-badge">KEY</span></div>
+      <div class="section-body">
+        <div class="grid-2">
+          <!-- NP: indirect cost rate -->
+          <div class="field np-only">
+            <label>Indirect Cost Rate Needed (%)</label>
+            <div class="hint">AI will flag funders that cap overhead below this</div>
+            <input type="text" id="indirectRate" placeholder="e.g. 20">
+          </div>
+          <!-- FP: dilution tolerance -->
+          <div class="field fp-only">
+            <label>Dilution Tolerance</label>
+            <div class="hint">Affects whether equity or non-dilutive grants are preferred</div>
+            <select id="dilution">
+              <option value="non-dilutive only (grants, contracts, prizes)">Non-dilutive only</option>
+              <option value="open to equity investment alongside grants">Open to equity + grants</option>
+              <option value="flexible">Flexible</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Matching / Cost-Share Capacity</label>
+            <select id="matchCapacity">
+              <option value="">Select…</option>
+              <option value="no match available">No match available</option>
+              <option value="up to 10% cash match">Up to 10% cash match</option>
+              <option value="up to 25% cash match">Up to 25% cash match</option>
+              <option value="up to 50% cash match">Up to 50% cash match</option>
+              <option value="in-kind match only">In-kind match only</option>
+              <option value="flexible">Flexible</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Restrictions / Ineligible Uses</label>
+          <input type="text" id="restrictions" placeholder="e.g. Cannot fund lobbying, political activity, or pure capital expenditures">
+        </div>
+
+        <div class="check-row np-only">
+          <input type="checkbox" id="openToNew" checked>
+          <label for="openToNew">Prioritize funders known to accept new / first-time grantees</label>
+        </div>
+        <div class="check-row fp-only">
+          <input type="checkbox" id="nonDilutiveOnly">
+          <label for="nonDilutiveOnly">Non-dilutive funding only — exclude any program requiring equity or revenue share</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CONTEXT & CALIBRATION ── -->
+    <div class="section">
+      <div class="section-head"><span>💬</span><span class="section-title">Context &amp; Calibration</span><span class="section-badge">IMPROVES RESULTS</span></div>
+      <div class="section-body">
+        <div class="field">
+          <label>Examples of Good-Fit Funders / Programs You Already Know</label>
+          <div class="hint">Helps the AI calibrate its recommendations — 1–3 examples dramatically improve output</div>
+          <input type="text" id="goodFitExamples" placeholder="e.g. NSF SBIR Phase I, DOE EERE, Texas Enterprise Fund">
+        </div>
+        <div class="field">
+          <label id="lbl-past">Current / Past Funders (AI will avoid duplicating these)</label>
+          <input type="text" id="pastGrantors" placeholder="e.g. City of Austin Innovation Grant, H-E-B Excellence in Education Award">
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Priority Use or Urgency</label>
+            <input type="text" id="urgency" placeholder="e.g. Hiring 2 engineers for prototype by Q3 2026">
+          </div>
+          <div class="field">
+            <label id="lbl-capacity">Application / BD Capacity</label>
+            <select id="appCapacity">
+              <option value="">Select…</option>
+              <option value="1 application per quarter">1 application per quarter</option>
+              <option value="2 applications per quarter">2 applications per quarter</option>
+              <option value="4+ applications per quarter">4+ applications per quarter</option>
+              <option value="short-form / LOI capacity only">Short-form / LOI only</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Anything Else the AI Should Know</label>
+          <textarea id="extras" rows="2" placeholder="e.g. We have a CRADA with a national lab. Our product has FDA 510(k) clearance. We're targeting Phase II SBIR after Phase I win."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary" onclick="generatePrompt()">✨ GENERATE 5-LAYER PROMPT →</button>
+      <button class="btn-reset" onclick="resetForm()">↺ Reset</button>
+    </div>
+  </div>
+
+  <!-- ══ PROMPT TAB ══ -->
+  <div id="tab-prompt" style="display:none">
+    <div id="prompt-empty" class="empty">
+      <div class="emoji">📋</div>
+      <p>No prompt generated yet.</p>
+      <p style="margin-top:8px;font-size:12px">Fill out the form and click <strong>Generate Prompt</strong>.</p>
+    </div>
+    <div id="prompt-output" style="display:none">
+      <div class="layer-badges">
+        <span class="lbadge" style="background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8">🎭 ROLE</span>
+        <span class="lbadge" style="background:#fef3c7;border:1px solid #fcd34d;color:#92400e">🧠 CHAIN-OF-THOUGHT</span>
+        <span class="lbadge" style="background:#dcfce7;border:1px solid #86efac;color:#15803d">📊 OUTPUT FORMAT</span>
+        <span class="lbadge" style="background:#fef9c3;border:1px solid #fde68a;color:#854d0e">✅ VERIFICATION</span>
+      </div>
+      <div class="prompt-box">
+        <div class="prompt-topbar">
+          <span class="prompt-label" id="prompt-meta">READY · 5 LAYERS</span>
+          <button class="btn-copy idle" id="copy-top" onclick="copyPrompt()">📋 COPY</button>
+        </div>
+        <pre class="prompt-pre" id="prompt-text"></pre>
+      </div>
+      <div class="copy-row">
+        <button class="btn-back" onclick="showTab('build',null)">← Edit Fields</button>
+        <button class="btn-copy-big idle" id="copy-big" onclick="copyPrompt()">📋 Copy Prompt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ GUIDE TAB ══ -->
+  <div id="tab-guide" style="display:none">
+    <div class="guide-card">
+      <div class="guide-head" style="background:#eff6ff;border-bottom:1px solid var(--border)"><span style="font-size:18px">🎭</span><span style="font-family:var(--mono);font-size:13px;font-weight:700;color:#1d4ed8">Layer 1 — Role Framing</span></div>
+      <div class="guide-body">The prompt assigns the AI an expert identity calibrated to your org type. For nonprofits, it becomes an institutional fundraiser fluent in PCS taxonomy and foundation strategy. For for-profits, it becomes a grant consultant specializing in SBIR/STTR, federal R&D programs, and economic development funding. Research shows role framing significantly improves output vocabulary, analytical depth, and relevance.</div>
+    </div>
+    <div class="guide-card">
+      <div class="guide-head" style="background:#fefce8;border-bottom:1px solid var(--border)"><span style="font-size:18px">🧠</span><span style="font-family:var(--mono);font-size:13px;font-weight:700;color:#854d0e">Layer 2 — Chain-of-Thought Reasoning</span></div>
+      <div class="guide-body">The prompt instructs the AI to reason step by step: geography → eligibility → mission/market alignment → financial fit → access assessment → final ranking. This structured reasoning produces better prioritization than a simple list request, because the AI must justify each step before reaching conclusions.</div>
+    </div>
+    <div class="guide-card">
+      <div class="guide-head" style="background:#f0fdf4;border-bottom:1px solid var(--border)"><span style="font-size:18px">📊</span><span style="font-family:var(--mono);font-size:13px;font-weight:700;color:#15803d">Layer 3 — Structured Output Format</span></div>
+      <div class="guide-body">The prompt specifies an exact 9-column table with funder name, program, award range, deadline, where to find it, funding type, fit score, rationale, and flags. This prevents vague summaries and produces results you can immediately act on. After the table, it asks for funding categories, search keywords, and red flags.</div>
+    </div>
+    <div class="guide-card">
+      <div class="guide-head" style="background:#fffbeb;border-bottom:1px solid var(--border)"><span style="font-size:18px">✅</span><span style="font-family:var(--mono);font-size:13px;font-weight:700;color:#92400e">Layer 4 — Verification &amp; Anti-Hallucination</span></div>
+      <div class="guide-body">The AI is instructed to review its own list and remove any funder it is less than 80% confident about — 8 high-confidence matches beats 15 uncertain ones. Borderline entries get flagged with a specific thing to verify, protecting you from acting on fabricated information.</div>
+    </div>
+    <div class="guide-card">
+      <div class="guide-head" style="background:#f0fdf4;border-bottom:1px solid var(--border)"><span style="font-size:18px">🏢</span><span style="font-family:var(--mono);font-size:13px;font-weight:700;color:#065f46">For-Profit Mode — What's Different</span></div>
+      <div class="guide-body">For-profit mode shifts the prompt to focus on non-dilutive government grants (SBIR/STTR, federal R&D agencies), state economic development programs, corporate innovation programs, and competition prizes. It adds NAICS code, TRL level, ownership certification, and dilution tolerance — all fields that gatekeep major government funding programs like SBIR Phase I/II.</div>
+    </div>
+    <div class="tips-box">
+      <div class="tips-label">💡 TIPS FOR BEST RESULTS</div>
+      <div class="tip-row"><span class="tip-num">1.</span><span>Enable web search in the AI (Claude's search toggle, Perplexity by default) — live data dramatically improves results</span></div>
+      <div class="tip-row"><span class="tip-num">2.</span><span>The "Good-Fit Examples" field is the single highest-leverage input — always fill in 1–3 programs you already know fit</span></div>
+      <div class="tip-row"><span class="tip-num">3.</span><span>For-profit: SBIR.gov and grants.gov are your primary verification sources for federal programs</span></div>
+      <div class="tip-row"><span class="tip-num">4.</span><span>Nonprofit: cross-reference Candid or Instrumentl to verify foundation deadlines and award history</span></div>
+      <div class="tip-row"><span class="tip-num">5.</span><span>Re-run with updated fields every quarter — your pipeline should be a living document</span></div>
+      <div class="tip-row"><span class="tip-num">6.</span><span>Ask the AI to "go deeper on the top 3 matches" in a follow-up for detailed application guidance</span></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ── MODE STATE ─────────────────────────────────────────────────
+let currentMode = 'np';
+
+function setMode(mode) {
+  currentMode = mode;
+  document.body.classList.toggle('fp-mode', mode === 'fp');
+
+  // toggle active class
+  document.getElementById('btn-np').className = 'mode-btn' + (mode==='np' ? ' active-np' : '');
+  document.getElementById('btn-fp').className = 'mode-btn' + (mode==='fp' ? ' active-fp' : '');
+
+  // update CSS accent vars
+  const r = document.documentElement.style;
+  if (mode === 'fp') {
+    r.setProperty('--accent',    '#059669');
+    r.setProperty('--accentDim', '#d1fae5');
+    r.setProperty('--accentGlow','rgba(5,150,105,0.15)');
+    r.setProperty('--headerA',   '#064e3b');
+    r.setProperty('--headerB',   '#059669');
+    r.setProperty('--headerC',   '#34d399');
+  } else {
+    r.setProperty('--accent',    '#2563eb');
+    r.setProperty('--accentDim', '#dbeafe');
+    r.setProperty('--accentGlow','rgba(37,99,235,0.15)');
+    r.setProperty('--headerA',   '#1e3a8a');
+    r.setProperty('--headerB',   '#2563eb');
+    r.setProperty('--headerC',   '#3b82f6');
+  }
+
+  // update dynamic text
+  document.getElementById('hdr-eyebrow').textContent = mode === 'fp'
+    ? '🏢 For-Profit Grant Intelligence · v3.0'
+    : '🏛️ Nonprofit Grant Intelligence · v3.0';
+  document.getElementById('hdr-desc').textContent = mode === 'fp'
+    ? 'Enter your company\'s details. Get a research-grade AI prompt optimized for SBIR/STTR, federal R&D grants, state economic development programs, and corporate innovation funding.'
+    : 'Fill in your org\'s details. Get a research-grade AI prompt with role framing, chain-of-thought reasoning, and built-in hallucination controls — ready to paste into any AI.';
+  document.getElementById('mode-label').textContent = mode === 'fp'
+    ? 'SBIR/STTR, federal R&D, state economic development & corporate innovation'
+    : 'Foundations, government, corporate grants & giving programs';
+
+  // field label updates
+  document.getElementById('lbl-budget').textContent = mode === 'fp' ? 'Annual Revenue (USD)' : 'Annual Budget (USD)';
+  document.getElementById('lbl-geo').textContent    = mode === 'fp' ? 'Primary Business Location' : 'Service Area';
+  document.getElementById('sec-focus-title').textContent = mode === 'fp' ? 'Market & Industry Focus' : 'Who You Serve & What You Do';
+  document.getElementById('focus-icon').textContent = mode === 'fp' ? '📈' : '🎯';
+  document.getElementById('lbl-issues').textContent = mode === 'fp' ? 'Industry / Technology Focus Areas' : 'Focus / Issue Areas';
+  document.getElementById('lbl-keywords').textContent = mode === 'fp' ? 'Product / Technology Keywords' : 'Program Keywords';
+  document.getElementById('lbl-past').textContent   = mode === 'fp' ? 'Current / Past Grants Won (AI will avoid duplicating)' : 'Current / Past Funders (AI will avoid duplicating)';
+  document.getElementById('lbl-capacity').textContent = mode === 'fp' ? 'Application / BD Capacity' : 'Application Capacity';
+  document.getElementById('sec-fin-title').textContent = mode === 'fp' ? 'Financial & Funding Criteria' : 'Financial & Operational Criteria';
+
+  // org phase options
+  const phaseEl = document.getElementById('orgPhase');
+  const fpPhases = ['pre-revenue startup','early-stage with some revenue','growth stage','mature / established'];
+  const npPhases = ['startup (0–2 yrs)','pilot / proof of concept','scaling','mature / established'];
+  const phases = mode === 'fp' ? fpPhases : npPhases;
+  phaseEl.innerHTML = phases.map((p,i) => `<option value="${p}"${i===2?' selected':''}>${p.charAt(0).toUpperCase()+p.slice(1)}</option>`).join('');
+}
+
+// ── TAB MANAGEMENT ─────────────────────────────────────────────
+function showTab(name, btn) {
+  ['build','prompt','guide'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', b===btn || (btn===null && ['build','prompt','guide'][i]===name));
+  });
+  if (btn===null) {
+    const idx = ['build','prompt','guide'].indexOf(name);
+    if (idx >= 0) document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+  }
+}
+
+// ── PILL TOGGLES ───────────────────────────────────────────────
+function togglePill(el, color) {
+  const cls = 'active-'+color;
+  el.classList.toggle(cls);
+}
+function getPills(group) {
+  return [...document.querySelectorAll(`.pill[data-group="${group}"][class*="active-"]`)]
+    .map(p => p.dataset.val);
+}
+
+// ── TAG INPUTS ─────────────────────────────────────────────────
+function addTag(key) {
+  const inputMap = { issueAreas:'issueAreasInp', keywords:'keywordsInp' };
+  const inp = document.getElementById(inputMap[key]);
+  if (!inp) return;
+  const val = inp.value.trim().replace(/,$/, '');
+  if (!val) return;
+  const hidden = document.getElementById(key);
+  const existing = hidden.value ? hidden.value.split(',').map(t=>t.trim()).filter(Boolean) : [];
+  if (existing.includes(val)) { inp.value=''; return; }
+  existing.push(val);
+  hidden.value = existing.join(', ');
+  renderTags(key, existing);
+  inp.value = '';
+}
+function removeTag(key, val) {
+  const hidden = document.getElementById(key);
+  const existing = hidden.value.split(',').map(t=>t.trim()).filter(t=>t && t!==val);
+  hidden.value = existing.join(', ');
+  renderTags(key, existing);
+}
+function renderTags(key, tags) {
+  const c = document.getElementById(key+'-tags');
+  if (c) c.innerHTML = tags.map(t =>
+    `<span class="tag-chip">${t}<span class="tag-x" onclick="removeTag('${key}','${CSS.escape(t)}')">×</span></span>`
+  ).join('');
+}
+document.addEventListener('DOMContentLoaded', () => {
+  [['issueAreasInp','issueAreas'],['keywordsInp','keywords']].forEach(([inpId, key]) => {
+    const el = document.getElementById(inpId);
+    if (el) el.addEventListener('keydown', e => {
+      if (e.key==='Enter'||e.key===',') { e.preventDefault(); addTag(key); }
+    });
+  });
+});
+
+// ── HELPERS ────────────────────────────────────────────────────
+function v(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+function chk(id) { const el = document.getElementById(id); return el ? el.checked : false; }
+
+// ── BUILD PROMPT ───────────────────────────────────────────────
+function buildPrompt() {
+  const fp = currentMode === 'fp';
+  const scopeLabels = { local:'Local/City', county:'County-wide', state:'Statewide', regional:'Multi-State Regional', national:'National', international:'International' };
+  const lines = [];
+
+  // ─ ROLE ─
+  lines.push(`## ROLE`);
+  if (fp) {
+    lines.push(`You are an expert grant consultant and innovation funding specialist with 20+ years of experience helping for-profit companies — from early-stage startups to established SMEs — identify and win non-dilutive government grants, federal R&D contracts, state economic development awards, and corporate innovation programs. You have deep knowledge of SBIR/STTR programs across all federal agencies (NIH, DOE, NSF, DOD, NASA, USDA, DHS), SBA resources, Grants.gov, SAM.gov, state-level innovation funds, and corporate accelerator/grant programs. You prioritize quality, verified matches and flag uncertainty honestly.`);
+  } else {
+    lines.push(`You are an expert institutional fundraiser and grant research specialist with 20+ years of experience matching nonprofits and social-sector organizations to funders. You have deep familiarity with Candid's Philanthropy Classification System (PCS), Grants.gov, Instrumentl, JustFund, and GrantStation databases. You prioritize quality matches over volume and flag uncertainty honestly.`);
+  }
+  lines.push(``, `---`, ``);
+
+  // ─ ORG CONTEXT ─
+  lines.push(`## MY ORGANIZATION`);
+  if (v('orgName')) lines.push(`- **Name:** ${v('orgName')}`);
+
+  if (fp) {
+    if (v('bizDesc'))      lines.push(`- **Business Description:** ${v('bizDesc')}`);
+    if (v('bizStructure')) lines.push(`- **Business Structure:** ${v('bizStructure')}`);
+    if (v('ownership'))    lines.push(`- **Ownership / Certifications:** ${v('ownership')}`);
+    if (v('naics'))        lines.push(`- **Industry / NAICS:** ${v('naics')}`);
+    if (v('trl') && v('trl') !== 'Not applicable') lines.push(`- **Technology Readiness Level:** ${v('trl')}`);
+  } else {
+    if (v('mission'))      lines.push(`- **Mission:** ${v('mission')}`);
+    lines.push(`- **Tax Status:** ${v('taxStatus')}`);
+    const fs = v('fiscalSponsor');
+    if (fs === 'yes') lines.push(`- **Fiscal Sponsor:** Yes — only include funders that accept fiscally sponsored organizations`);
+    if (fs === 'transitioning') lines.push(`- **Fiscal Sponsor:** In transition`);
+  }
+
+  if (v('orgAge'))    lines.push(`- **Years Operating:** ${v('orgAge')}`);
+  lines.push(`- **Phase:** ${v('orgPhase')}`);
+  if (v('budget'))    lines.push(`- **${fp ? 'Annual Revenue' : 'Annual Budget'}:** $${v('budget')}`);
+  if (v('staffSize')) lines.push(`- **Team Size:** ${v('staffSize')}`);
+  if (v('geography')) lines.push(`- **${fp ? 'Primary Location' : 'Geographic Service Area'}:** ${v('geography')}`);
+  lines.push(`- **Geographic Scope of Funding Needed:** ${scopeLabels[v('geoScope')] || v('geoScope')}`);
+  lines.push(``);
+
+  // ─ FOCUS ─
+  lines.push(fp ? `## MARKET & TECHNOLOGY FOCUS` : `## WHO WE SERVE & WHAT WE DO`);
+  if (fp && v('targetMarket')) lines.push(`- **Target Market / Customer:** ${v('targetMarket')}`);
+  if (!fp && v('population'))  lines.push(`- **Target Population:** ${v('population')}`);
+  const issueAreas = v('issueAreas');
+  const keywords   = v('keywords');
+  if (issueAreas) lines.push(`- **${fp ? 'Industry / Technology Areas' : 'Issue Areas (PCS-aligned)'}:** ${issueAreas}`);
+  if (keywords)   lines.push(`- **${fp ? 'Product / Technology Keywords' : 'Program Keywords'}:** ${keywords}`);
+  const emerging = fp ? getPills('fp-emerging').join(', ') : getPills('emerging').join(', ');
+  if (emerging)   lines.push(`- **Priority Categories:** ${emerging}`);
+  lines.push(``);
+
+  // ─ CRITERIA ─
+  lines.push(`## FUNDING SEARCH CRITERIA`);
+  if (v('grantMin') || v('grantMax')) {
+    const parts = [];
+    if (v('grantMin')) parts.push(`minimum $${v('grantMin')}`);
+    if (v('grantMax')) parts.push(`maximum $${v('grantMax')}`);
+    lines.push(`- **Amount Range:** ${parts.join(' — ')}`);
+  }
+  lines.push(`- **Deadline Lead Time Required:** At least ${v('daysOut')} days from today`);
+
+  const funderTypes   = fp ? getPills('fp-funderTypes').join(', ') : getPills('funderTypes').join(', ');
+  const supportTypes  = fp ? getPills('fp-supportTypes').join(', ') : getPills('supportTypes').join(', ');
+  if (funderTypes)  lines.push(`- **Preferred ${fp ? 'Funding Sources' : 'Funder Types'}:** ${funderTypes}`);
+  if (supportTypes) lines.push(`- **${fp ? 'Use of Funds' : 'Support Type'}:** ${supportTypes}`);
+  lines.push(`- **Multi-Year Preference:** ${v('multiYear')}`);
+  lines.push(`- **Application Burden Tolerance:** ${v('appBurden')}`);
+
+  if (fp) {
+    if (v('dilution'))  lines.push(`- **Dilution Tolerance:** ${v('dilution')}`);
+    if (chk('nonDilutiveOnly')) lines.push(`- **Funding Constraint:** Non-dilutive only — exclude equity-requiring programs`);
+  } else {
+    if (v('indirectRate')) lines.push(`- **Indirect Cost Rate Needed:** ${v('indirectRate')}% — flag any funders that cap below this`);
+    if (chk('openToNew')) lines.push(`- **New Grantee Preference:** Prioritize funders with evidence of accepting new/first-time grantees`);
+  }
+  if (v('matchCapacity')) lines.push(`- **Matching / Cost-Share Capacity:** ${v('matchCapacity')}`);
+  if (v('restrictions'))  lines.push(`- **Restrictions / Ineligible Uses:** ${v('restrictions')}`);
+  lines.push(``);
+
+  // ─ ADDITIONAL CONTEXT ─
+  const hasCtx = v('goodFitExamples') || v('pastGrantors') || v('urgency') || v('appCapacity') || v('extras');
+  if (hasCtx) {
+    lines.push(`## ADDITIONAL CONTEXT`);
+    if (v('goodFitExamples')) lines.push(`- **Good-Fit Examples (calibration):** ${v('goodFitExamples')}`);
+    if (v('pastGrantors'))    lines.push(`- **Past Funders / Awards (avoid duplicating):** ${v('pastGrantors')}`);
+    if (v('urgency'))         lines.push(`- **Priority Use / Urgency:** ${v('urgency')}`);
+    if (v('appCapacity'))     lines.push(`- **Application Capacity:** ${v('appCapacity')}`);
+    if (v('extras'))          lines.push(`- **Other Context:** ${v('extras')}`);
+    lines.push(``);
+  }
+
+  // ─ CHAIN OF THOUGHT ─
+  lines.push(`## REASONING INSTRUCTION (Chain-of-Thought)`);
+  lines.push(`Work through this step by step before generating your final list:`);
+  lines.push(`1. **Geography filter** — eliminate any program that doesn't cover my location or allow remote/national applicants`);
+  lines.push(`2. **Eligibility filter** — eliminate programs where my ${fp ? 'business structure, size, or NAICS code' : 'org type, tax status, or budget'} is ineligible`);
+  if (fp) {
+    lines.push(`3. **Technology fit** — assess how closely my technology domain, TRL level, and market match each program's scope (score 1–10)`);
+    lines.push(`4. **Financial fit** — flag any program with cost-share requirements beyond my stated capacity, or equity requirements if non-dilutive only`);
+    lines.push(`5. **Access assessment** — note application entry point (solicitation, continuous open BAA, state portal), cycle timing, and typical award timeline`);
+  } else {
+    lines.push(`3. **Mission alignment** — score each funder on how closely their stated priorities match my mission (1–10)`);
+    lines.push(`4. **Financial fit** — flag any funder with indirect cost caps below my stated rate or matching requirements I cannot meet`);
+    lines.push(`5. **Access assessment** — note whether the funder accepts new grantees and what the entry point is (LOI, full proposal, or online form)`);
+  }
+  lines.push(`6. **Final ranking** — rank by combined fit score and practical feasibility`);
+  lines.push(``);
+
+  // ─ OUTPUT FORMAT ─
+  lines.push(`## REQUIRED OUTPUT FORMAT`);
+  lines.push(`Provide a table with these exact columns:`);
+  lines.push(``);
+  lines.push(`| ${fp ? 'Program / Agency' : 'Funder Name'} | ${fp ? 'Solicitation / Program Name' : 'Program Name'} | Award Range | Deadline / Cycle | Where to Find It | ${fp ? 'Funding Type' : 'Support Type'} | Fit Score (1–10) | Why It Fits | Flags / Cautions |`);
+  lines.push(`|---|---|---|---|---|---|---|---|---|`);
+  lines.push(``);
+  lines.push(`After the table, provide:`);
+  lines.push(`**A. Top 3 ${fp ? 'Funding Source Categories' : 'Funder Categories'} to Prioritize** — best-suited types for my profile`);
+  lines.push(`**B. Top 5 Search Keywords** — terms to use when searching ${fp ? 'SBIR.gov, Grants.gov, SAM.gov, and state portals' : 'Candid, Instrumentl, or GrantStation'}`);
+  lines.push(`**C. Red Flags to Watch** — programs or funding types to avoid given my profile`);
+  lines.push(``);
+
+  // ─ VERIFICATION ─
+  lines.push(`## VERIFICATION STEP (Anti-Hallucination)`);
+  lines.push(`Before finalizing:`);
+  lines.push(`- Remove any entry where you are **less than 80% confident** it exists and accepts my type of ${fp ? 'company' : 'organization'}`);
+  lines.push(`- For entries 80–95% confident, add to Flags: "(Verify: [specific thing to confirm])"`);
+  lines.push(`- 8 high-confidence matches beats 15 uncertain ones`);
+  lines.push(`- If you used web search, cite the source URL for any deadline or award range retrieved from a live page`);
+  if (fp) lines.push(`- For SBIR/STTR, always note the specific agency and topic number if known`);
+
+  return lines.join('\n');
+}
+
+// ── GENERATE & DISPLAY ─────────────────────────────────────────
+function generatePrompt() {
+  const text = buildPrompt();
+  document.getElementById('prompt-text').textContent = text;
+  const lines = text.split('\n').length;
+  const modeLabel = currentMode === 'fp' ? 'FOR-PROFIT' : 'NONPROFIT';
+  document.getElementById('prompt-meta').textContent = `${modeLabel} · ${lines} LINES · 5 LAYERS`;
+  document.getElementById('prompt-empty').style.display = 'none';
+  document.getElementById('prompt-output').style.display = 'block';
+  showTab('prompt', document.querySelectorAll('.tab-btn')[1]);
+}
+
+// ── COPY ───────────────────────────────────────────────────────
+function copyPrompt() {
+  const text = document.getElementById('prompt-text').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    ['copy-top','copy-big'].forEach(id => {
+      const btn = document.getElementById(id);
+      btn.textContent = '✓ COPIED!';
+      btn.classList.replace('idle','done');
+    });
+    setTimeout(() => {
+      document.getElementById('copy-top').textContent = '📋 COPY';
+      document.getElementById('copy-top').classList.replace('done','idle');
+      document.getElementById('copy-big').textContent = '📋 Copy Prompt';
+      document.getElementById('copy-big').classList.replace('done','idle');
+    }, 2500);
+  });
+}
+
+// ── RESET ──────────────────────────────────────────────────────
+function resetForm() {
+  document.querySelectorAll('input[type=text], textarea').forEach(el => el.value = '');
+  document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+  ['openToNew','nonDilutiveOnly'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.checked = id === 'openToNew';
+  });
+  document.querySelectorAll('.pill').forEach(p => p.className = 'pill');
+  ['issueAreas','keywords'].forEach(key => {
+    const h = document.getElementById(key);
+    if (h) h.value = '';
+    const t = document.getElementById(key+'-tags');
+    if (t) t.innerHTML = '';
+  });
+  document.getElementById('prompt-empty').style.display = 'block';
+  document.getElementById('prompt-output').style.display = 'none';
+  showTab('build', document.querySelectorAll('.tab-btn')[0]);
+}
+
+// ── DEFAULT MODE: FOR-PROFIT ───────────────────────────────────
+// Ironfeast is positioned around SBIR/STTR, so the tool opens on
+// the For-Profit side. Nonprofit stays one click away.
+// setMode() already handles the button classes, body class, accent
+// vars and phase options, so this is the whole change.
+document.addEventListener('DOMContentLoaded', () => setMode('fp'));
+</script>
+
+<section class="site-cta">
+  <h2>Want us to actually run this for you?</h2>
+  <p>The prompt gets you a shortlist. Turning that shortlist into a funded application is what we do &mdash; Ironfeast has guided founders and researchers through SBIR/STTR and federal grant submissions from first draft to award.</p>
+  <a class="site-cta-btn" href="<%= siteBase %>/schedule">Book a free call</a>
+</section>
+
+<footer class="site-footer">
+  <p>&copy; 2026 Ironfeast Consulting. All Rights Reserved.</p>
+</footer>
+</body>
+</html>

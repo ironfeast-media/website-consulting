@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grant Opportunity Prompt Builder | Ironfeast Consulting</title>
+<meta name="description" content="Build a research-grade AI prompt for finding grant opportunities — nonprofit or for-profit. A free tool from Ironfeast Consulting.">
+<link rel="canonical" href="<%= siteBase %>/grant-builder">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600;700&display=swap">
+<style>
+  :root {
+    --bg: #f4f6fa;
+    --surface: #ffffff;
+    --border: #dce2ee;
+    --blue: #2563eb;
+    --text: #1e2a3a;
+    --muted: #52647a;
+    --red: #dc2626;
+    --serif: 'Lora', Georgia, serif;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+    --sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--serif);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Ironfeast site chrome (copied from index.ejs, namespaced) ── */
+  .site-header {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    padding: 1rem 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    font-family: var(--sans);
+  }
+  .site-nav-inner {
+    max-width: 1200px; margin: 0 auto; padding: 0 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .site-logo { font-size: 1.8rem; font-weight: 700; color: #ecf0f1; text-decoration: none; line-height: 1.2; }
+  .site-nav-links { display: flex; gap: 25px; list-style: none; flex-wrap: wrap; }
+  .site-nav-links a { text-decoration: none; color: #ecf0f1; font-weight: 500; transition: color .3s ease; }
+  .site-nav-links a:hover, .site-nav-links a:focus-visible { color: #3498db; }
+  .site-nav-links a[aria-current="page"] { color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 2px; }
+  .site-footer {
+    text-align: center; padding: 20px; background-color: #2c3e50;
+    color: #ecf0f1; margin-top: auto; font-family: var(--sans);
+  }
+
+  /* ── Gate ── */
+  .gate-wrap { flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 20px; }
+  .gate {
+    width: 100%; max-width: 560px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 14px;
+    padding: 40px 36px; box-shadow: 0 4px 24px rgba(30,42,58,0.06);
+  }
+  .eyebrow {
+    font-family: var(--mono); font-size: .72rem; font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--blue);
+    margin-bottom: 14px;
+  }
+  .gate h1 { font-size: 1.85rem; line-height: 1.25; text-wrap: balance; margin-bottom: 14px; }
+  .gate h1 span { color: var(--blue); }
+  .gate .lede { color: var(--muted); line-height: 1.65; margin-bottom: 22px; }
+  .gate ul { list-style: none; margin-bottom: 26px; display: grid; gap: 9px; }
+  .gate ul li { color: var(--muted); font-size: .95rem; padding-left: 26px; position: relative; line-height: 1.5; }
+  .gate ul li::before {
+    content: "→"; position: absolute; left: 0; top: 0;
+    color: var(--blue); font-family: var(--mono); font-weight: 700;
+  }
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block; font-family: var(--sans); font-size: .82rem; font-weight: 600;
+    color: var(--text); margin-bottom: 6px;
+  }
+  .field input {
+    width: 100%; padding: 12px 14px; font-family: var(--sans); font-size: 1rem;
+    color: var(--text); background: #fff;
+    border: 1px solid #c8d0e4; border-radius: 8px;
+  }
+  .field input:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; border-color: var(--blue); }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .submit {
+    width: 100%; margin-top: 8px; padding: 14px 20px;
+    font-family: var(--sans); font-size: 1rem; font-weight: 700;
+    color: #fff; background: var(--blue); border: none; border-radius: 8px;
+    cursor: pointer; transition: background-color .25s ease;
+  }
+  .submit:hover, .submit:focus-visible { background: #1d4ed8; }
+  .error {
+    background: #fef2f2; border: 1px solid #fecaca; color: var(--red);
+    font-family: var(--sans); font-size: .9rem; padding: 11px 14px;
+    border-radius: 8px; margin-bottom: 18px;
+  }
+  .fineprint {
+    font-family: var(--sans); font-size: .78rem; color: #a0afc0;
+    text-align: center; margin-top: 16px; line-height: 1.5;
+  }
+  @media (max-width: 600px) {
+    .site-nav-inner { justify-content: center; text-align: center; }
+    .site-nav-links { gap: 16px; justify-content: center; }
+    .site-logo { font-size: 1.45rem; }
+    .gate { padding: 30px 22px; }
+    .gate h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-nav-inner">
+    <a href="<%= siteBase %>/" class="site-logo">Ironfeast Consulting</a>
+    <nav aria-label="Main">
+      <ul class="site-nav-links">
+        <li><a href="<%= siteBase %>/#overview">Overview</a></li>
+        <li><a href="<%= siteBase %>/#about">About Us</a></li>
+        <li><a href="<%= siteBase %>/#sbir">SBIR Info</a></li>
+        <li><a href="<%= siteBase %>/grant-builder" aria-current="page">Grant Builder</a></li>
+        <li><a href="<%= siteBase %>/#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main class="gate-wrap">
+  <div class="gate">
+    <div class="eyebrow">Grant Intelligence &middot; v3.0</div>
+    <h1>Grant Opportunity <span>Prompt Builder</span></h1>
+    <p class="lede">
+      Answer a few questions about your organization and get a research-grade AI prompt
+      built to surface grant opportunities you actually qualify for &mdash; ready to paste
+      into any AI.
+    </p>
+    <ul>
+      <li>Role framing and chain-of-thought reasoning built in</li>
+      <li>Hallucination controls, so it stops inventing funders</li>
+      <li>Separate modes for for-profit and nonprofit applicants</li>
+      <li>Free, and yours to reuse as often as you like</li>
+    </ul>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <p class="error" role="alert"><%= error %></p>
+    <% } %>
+
+    <form method="post" action="<%= siteBase %>/grant-builder" novalidate>
+      <div class="field">
+        <label for="name">Your name</label>
+        <input type="text" id="name" name="name" autocomplete="name"
+               value="<%= typeof values !== 'undefined' && values.name ? values.name : '' %>" required>
+      </div>
+      <div class="field">
+        <label for="email">Work email</label>
+        <input type="email" id="email" name="email" autocomplete="email"
+               value="<%= typeof values !== 'undefined' && values.email ? values.email : '' %>" required>
+      </div>
+      <div class="hp" aria-hidden="true">
+        <label for="company_website">Leave this field empty</label>
+        <input type="text" id="company_website" name="company_website" tabindex="-1" autocomplete="off">
+      </div>
+      <button type="submit" class="submit">Open the builder</button>
+    </form>
+
+    <p class="fineprint">
+      We will email you a copy of the link. No spam, and we will not share your address.
+    </p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <p>&copy; 2026 Ironfeast Consulting. All Rights Reserved.</p>
+</footer>
+
+</body>
+</html>
